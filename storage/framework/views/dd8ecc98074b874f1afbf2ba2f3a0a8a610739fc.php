@@ -30,9 +30,130 @@
     display: block; /* Ensure it behaves properly in flex/grid layouts */
 }
 
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            font-size: 28px;
+        }
+
+        /* Grid Layout for Courses */
+        .courses-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            padding: 20px;
+        }
+
+        /* Course Card */
+        .course-card {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            transition: transform 0.3s ease-in-out;
+            border-left: 5px solid #dacc5f;
+        }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+            background: #f1f1f1;
+        }
+
+        /* Course Content */
+        .course-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 8px;
+        }
+
+        .course-info {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 8px;
+        }
+
+        .fee {
+            font-size: 16px;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .courses-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .courses-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 500px) {
+            .courses-container {
+                grid-template-columns: repeat(1, 1fr);
+            }
+        }
+
+        .courses-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.course-card {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+}
+
+.course-card:hover {
+    transform: translateY(-5px);
+}
+
+.course-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #007bff;
+    margin-bottom: 10px;
+}
+
+.course-info {
+    font-size: 14px;
+    color: #333;
+}
+
+.fee {
+    font-size: 16px;
+    font-weight: bold;
+    color: #28a745;
+    margin-top: 10px;
+}
 
 
-</style>
+
+    </style>
 
 <?php $__env->startSection('content'); ?>
 
@@ -234,6 +355,70 @@
         </section>
         <!-- cta-area-end -->
         <?php endif; ?>
+
+
+
+
+
+<!-- Course Area -->
+<div class="container">
+    <h2 class="text-center">Available Courses</h2>
+
+    <?php
+        use App\Models\Course;
+        $courses = Course::where('status', 1)->orderBy('faculty')->get();
+    ?>
+
+    <div class="courses-container">
+        <?php $__empty_1 = true; $__currentLoopData = $courses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+            <div class="course-card">
+                <div class="course-title"><?php echo e($course->title); ?></div>
+                <div class="course-info">
+                    <strong>Faculty:</strong> <?php echo e($course->faculty); ?><br>
+                    <strong>Duration:</strong> <?php echo e($course->duration); ?>
+
+                </div>
+                <div class="fee">Fee: KSH <?php echo e(number_format($course->fee, 2)); ?></div>
+            </div>
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+            <p class="text-center text-muted">No courses available at the moment.</p>
+        <?php endif; ?>
+    </div>
+</div>
+
+
+
+    
+
+
+     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
         <?php if(count($testimonials) > 0): ?>
