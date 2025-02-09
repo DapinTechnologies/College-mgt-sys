@@ -210,7 +210,7 @@
       'file' => 
       array (
         'driver' => 'file',
-        'path' => 'C:\\Users\\User\\Desktop\\business\\backup\\Dapin\\Dapin\\storage\\framework/cache/data',
+        'path' => 'C:\\Users\\User\\Desktop\\business\\backup\\Dapin\\stk -trial\\Dapin\\Dapin\\storage\\framework/cache/data',
       ),
       'memcached' => 
       array (
@@ -437,7 +437,7 @@
     ),
     'temporary_files' => 
     array (
-      'local_path' => 'C:\\Users\\User\\Desktop\\business\\backup\\Dapin\\Dapin\\storage\\framework/laravel-excel',
+      'local_path' => 'C:\\Users\\User\\Desktop\\business\\backup\\Dapin\\stk -trial\\Dapin\\Dapin\\storage\\framework/laravel-excel',
       'remote_disk' => NULL,
       'remote_prefix' => NULL,
       'force_resync_remote' => NULL,
@@ -452,12 +452,12 @@
       'local' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\Users\\User\\Desktop\\business\\backup\\Dapin\\Dapin\\storage\\app',
+        'root' => 'C:\\Users\\User\\Desktop\\business\\backup\\Dapin\\stk -trial\\Dapin\\Dapin\\storage\\app',
       ),
       'public' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\Users\\User\\Desktop\\business\\backup\\Dapin\\Dapin\\storage\\app/public',
+        'root' => 'C:\\Users\\User\\Desktop\\business\\backup\\Dapin\\stk -trial\\Dapin\\Dapin\\storage\\app/public',
         'url' => 'https://b1bc-154-159-252-59.ngrok-free.app/storage',
         'visibility' => 'public',
       ),
@@ -509,13 +509,13 @@
       'single' => 
       array (
         'driver' => 'single',
-        'path' => 'C:\\Users\\User\\Desktop\\business\\backup\\Dapin\\Dapin\\storage\\logs/laravel.log',
+        'path' => 'C:\\Users\\User\\Desktop\\business\\backup\\Dapin\\stk -trial\\Dapin\\Dapin\\storage\\logs/laravel.log',
         'level' => 'debug',
       ),
       'daily' => 
       array (
         'driver' => 'daily',
-        'path' => 'C:\\Users\\User\\Desktop\\business\\backup\\Dapin\\Dapin\\storage\\logs/laravel.log',
+        'path' => 'C:\\Users\\User\\Desktop\\business\\backup\\Dapin\\stk -trial\\Dapin\\Dapin\\storage\\logs/laravel.log',
         'level' => 'debug',
         'days' => 14,
       ),
@@ -579,7 +579,7 @@
       'theme' => 'default',
       'paths' => 
       array (
-        0 => 'C:\\Users\\User\\Desktop\\business\\backup\\Dapin\\Dapin\\resources\\views/vendor/mail',
+        0 => 'C:\\Users\\User\\Desktop\\business\\backup\\Dapin\\stk -trial\\Dapin\\Dapin\\resources\\views/vendor/mail',
       ),
     ),
     'log_channel' => NULL,
@@ -783,7 +783,7 @@
     'lifetime' => '120',
     'expire_on_close' => false,
     'encrypt' => false,
-    'files' => 'C:\\Users\\User\\Desktop\\business\\backup\\Dapin\\Dapin\\storage\\framework/sessions',
+    'files' => 'C:\\Users\\User\\Desktop\\business\\backup\\Dapin\\stk -trial\\Dapin\\Dapin\\storage\\framework/sessions',
     'connection' => NULL,
     'table' => 'sessions',
     'store' => NULL,
@@ -889,9 +889,9 @@
   array (
     'paths' => 
     array (
-      0 => 'C:\\Users\\User\\Desktop\\business\\backup\\Dapin\\Dapin\\resources\\views',
+      0 => 'C:\\Users\\User\\Desktop\\business\\backup\\Dapin\\stk -trial\\Dapin\\Dapin\\resources\\views',
     ),
-    'compiled' => 'C:\\Users\\User\\Desktop\\business\\backup\\Dapin\\Dapin\\storage\\framework\\views',
+    'compiled' => 'C:\\Users\\User\\Desktop\\business\\backup\\Dapin\\stk -trial\\Dapin\\Dapin\\storage\\framework\\views',
   ),
   'image' => 
   array (
@@ -922,7 +922,7 @@
   'livewire' => 
   array (
     'class_namespace' => 'App\\Http\\Livewire',
-    'view_path' => 'C:\\Users\\User\\Desktop\\business\\backup\\Dapin\\Dapin\\resources\\views/livewire',
+    'view_path' => 'C:\\Users\\User\\Desktop\\business\\backup\\Dapin\\stk -trial\\Dapin\\Dapin\\resources\\views/livewire',
     'layout' => 'layouts.app',
     'asset_url' => NULL,
     'app_url' => NULL,
@@ -1143,7 +1143,7 @@
     array (
     ),
     'enable_runnable_solutions' => NULL,
-    'remote_sites_path' => 'C:\\Users\\User\\Desktop\\business\\backup\\Dapin\\Dapin',
+    'remote_sites_path' => 'C:\\Users\\User\\Desktop\\business\\backup\\Dapin\\stk -trial\\Dapin\\Dapin',
     'local_sites_path' => '',
     'housekeeping_endpoint_prefix' => '_ignition',
     'settings_file_path' => '',

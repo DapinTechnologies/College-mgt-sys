@@ -79,6 +79,10 @@ Route::get('/sms/balance', [SmsController::class, 'showBalance'])->name('sms.bal
 
 Route::get('/balance/credit', [SmsController::class, 'showCredits'])->name('dashboardbalance');
 
+Route::get('/fetch-sms-balance', [SmsController::class, 'fetchBalance'])->name('fetch.sms.balance');
+
+
+
 
 Route::get('/all/digital/files', [FileController::class, 'index'])->name('alldigitalbooks');
 Route::post('/digita/file', [FileController::class, 'store'])->name('filepost');

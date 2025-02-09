@@ -11,6 +11,13 @@ use App\Models\SmsConfiguration;
 use App\Models\SMSMessage;
 class SmsController extends Controller
 {
+
+    protected $smsService;
+
+    public function __construct(SMSService $smsService)
+    {
+        $this->smsService = $smsService;
+    }
     public function index()
     {
         $title = 'SMS SEND';
@@ -538,7 +545,11 @@ public function showDashboard(SMSService $smsService)
     return view('admin.index', compact('balance'));
 }
 
-
+public function fetchBalance()
+{
+    $balance = $this->smsService->checkBalance();
+    return response()->json(['balance' => $balance]);
+}
 
 
 }

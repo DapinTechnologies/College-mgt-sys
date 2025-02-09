@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\Log;
 class SMSService
 {
 
-    protected $apiUrl; protected $serviceId; 
+    protected $apiUrl; 
+    protected $serviceId; 
     public function __construct() 
     { $smsConfig = SmsConfiguration::first(); if ($smsConfig)
          { $this->apiUrl = $smsConfig->api_url; 
@@ -22,46 +23,34 @@ class SMSService
          }
     //protected $apiUrl = 'https://smsportal.dapintechnologies.com/sms/v3/profile';
 
-    public function checkBalance($apiKey)
-{
-    // $response = Http::post($this->apiUrl, [
-    //     'api_key' => $apiKey
-    // ]);
-
-
-//     if (is_array($data) && isset($data[0]['wallet']['credit_balance'])) {
-//         return (float)$data[0]['wallet']['credit_balance'];
-//     } else {
-//         Log::error('Unexpected API response structure', ['response' => $data]);
-//         return 'Credit balance not found in the response.';
-//     }
-// }
-
-// Log::error('Failed to authenticate API key', ['api_key' => $apiKey, 'response' => $response->body()]);
-// return 'Failed to authenticate API key.';
-
-
-
-
-    $response = Http::post('https://smsportal.dapintechnologies.com/sms/v3/profile',
-     [ 
-        'api_key' => $apiKey 
-    ]);
-
-
-
-    if ($response->successful()) {
-        $data = $response->json();
-
-        if ($response->successful()) { $responseJson = $response->json();
-             return $responseJson['wallet']['credit_balance'] ?? 'Balance not found'; } else 
-        { Log::error('Failed to authenticate API key.', ['response' => $response->body()]);
-             return 'Failed to authenticate API key.'; 
-            } 
+    public function checkBalance()
+    {
+        $smsConfig = SmsConfiguration::first();
+        if (!$smsConfig) {
+            return 'No SMS configuration found';
         }
-       
-}
-
+    
+        $apiKey = $smsConfig->api_key;
+    
+        try {
+            $response = Http::withOptions([
+                'verify' => false  // Disables SSL certificate verification
+            ])->post('https://smsportal.dapintechnologies.com/sms/v3/profile', [
+                'api_key' => $apiKey
+            ]);
+    
+            if ($response->successful()) {
+                $responseJson = $response->json();
+                return $responseJson[0]['wallet']['credit_balance'] ?? 'Balance not found';
+            } else {
+                Log::error("Failed to authenticate API key.", ['response' => $response->body()]);
+                return 'Failed to authenticate API key.';
+            }
+        } catch (\Exception $e) {
+            Log::error("SMS API request exception: " . $e->getMessage());
+            return 'Error fetching balance';
+        }
+    }
     
 
     public function alertIfLowCredit($apiKey)
