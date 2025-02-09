@@ -23,214 +23,105 @@
 
 <style>
 
+/* General Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+}
+
+/* Reduce margin & padding of sections */
+.container {
+    max-width: 1200px;
+    margin: 10px auto;
+    padding: 10px 15px;
+}
+
+h2 {
+    text-align: center;
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+
+/* Reduce padding in sections */
+.pt-120, .pb-120 {
+    padding-top: 80px !important;
+    padding-bottom: 80px !important;
+}
+
+/* Compact Grid Layout */
+.courses-container, .news-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    padding: 10px;
+}
+
+/* Course & News Card */
+.course-card, .news-card {
+    background: #ffffff;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    padding: 10px;
+    transition: transform 0.2s ease-in-out;
+    border-left: 4px solid #ff6600;
+}
+
+.course-card:hover, .news-card:hover {
+    transform: translateY(-3px);
+    background: #f6f6f6;
+}
+
+/* Text Styling */
+.course-title, .news-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #007bff;
+    margin-bottom: 5px;
+}
+
+.course-info, .news-description {
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+/* Fee & Date Text */
+.fee, .news-date {
+    font-size: 14px;
+    font-weight: bold;
+    color: #28a745;
+}
+
+/* Director Image */
 .director-image {
     width: 350px;
     height: 350px;
-    object-fit: cover; /* Ensures the image fills the box without distortion */
-    border-radius: 10px; /* Optional: Rounded corners */
-    display: block; /* Ensure it behaves properly in flex/grid layouts */
+    object-fit: cover;
+    border-radius: 10px;
+    display: block;
 }
 
-        /* General Styles */
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f8f9fa;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 20px;
-        }
-
-        h2 {
-            text-align: center;
-            color: #333;
-            font-size: 28px;
-        }
-
-        /* Grid Layout for Courses */
-        .courses-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            padding: 20px;
-        }
-
-        /* Course Card */
-        .course-card {
-            background: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            padding: 15px;
-            transition: transform 0.3s ease-in-out;
-            border-left: 5px solid #dacc5f;
-        }
-
-        .course-card:hover {
-            transform: translateY(-5px);
-            background: #f1f1f1;
-        }
-
-        /* Course Content */
-        .course-title {
-            font-size: 16px;
-            font-weight: bold;
-            color: #007bff;
-            margin-bottom: 8px;
-        }
-
-        .course-info {
-            font-size: 14px;
-            color: #555;
-            margin-bottom: 8px;
-        }
-
-        .fee {
-            font-size: 16px;
-            font-weight: bold;
-            color: #28a745;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 1024px) {
-            .courses-container {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .courses-container {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 500px) {
-            .courses-container {
-                grid-template-columns: repeat(1, 1fr);
-            }
-        }
-
-        .courses-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
+/* Responsive Adjustments */
+@media (max-width: 1024px) {
+    .courses-container, .news-container {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 
-.course-card {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 8px;
-    text-align: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s;
+@media (max-width: 768px) {
+    .courses-container, .news-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
-.course-card:hover {
-    transform: translateY(-5px);
+@media (max-width: 500px) {
+    .courses-container, .news-container {
+        grid-template-columns: repeat(1, 1fr);
+    }
 }
-
-.course-title {
-    font-size: 18px;
-    font-weight: bold;
-    color: #007bff;
-    margin-bottom: 10px;
-}
-
-.course-info {
-    font-size: 14px;
-    color: #333;
-}
-
-.fee {
-    font-size: 16px;
-    font-weight: bold;
-    color: #28a745;
-    margin-top: 10px;
-}
-
-
-
-
-  /* General Styles */
-  body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f8f9fa;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 20px;
-        }
-
-        h2 {
-            text-align: center;
-            color: #333;
-            font-size: 28px;
-            margin-bottom: 20px;
-        }
-
-        /* Grid Layout */
-        .news-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 15px;
-            padding: 20px;
-        }
-
-        /* News Card */
-        .news-card {
-            background: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            padding: 15px;
-            transition: transform 0.3s ease-in-out;
-            border-left: 5px solid #007bff;
-        }
-
-        .news-card:hover {
-            transform: translateY(-5px);
-            background: #f1f1f1;
-        }
-
-        /* News Content */
-        .news-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #007bff;
-            margin-bottom: 8px;
-        }
-
-        .news-description {
-            font-size: 14px;
-            color: #555;
-            margin-bottom: 10px;
-        }
-
-        .news-date {
-            font-size: 12px;
-            color: #777;
-            text-align: right;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 1024px) {
-            .news-container {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .news-container {
-                grid-template-columns: repeat(1, 1fr);
-            }
-        }
 
     </style>
 
