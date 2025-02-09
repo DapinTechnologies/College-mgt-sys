@@ -154,6 +154,84 @@
 
 
 
+
+  /* General Styles */
+  body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        /* Grid Layout */
+        .news-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            padding: 20px;
+        }
+
+        /* News Card */
+        .news-card {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            transition: transform 0.3s ease-in-out;
+            border-left: 5px solid #007bff;
+        }
+
+        .news-card:hover {
+            transform: translateY(-5px);
+            background: #f1f1f1;
+        }
+
+        /* News Content */
+        .news-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 8px;
+        }
+
+        .news-description {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .news-date {
+            font-size: 12px;
+            color: #777;
+            text-align: right;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .news-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .news-container {
+                grid-template-columns: repeat(1, 1fr);
+            }
+        }
+
     </style>
 
 @section('content')
@@ -390,7 +468,31 @@
     
 
 
-     
+
+<!-- News Section -->
+<div class="container">
+    <h2 class="text-center">Latest News</h2>
+
+    @php
+        use App\Models\News;
+        $newsItems = News::where('status', 1)->orderBy('date', 'desc')->get();
+    @endphp
+
+    <div class="news-container">
+        @forelse($newsItems as $news)
+            <div class="news-card">
+                <div class="news-title">{{ $news->title }}</div>
+                <div class="news-description">
+                    {{ Str::limit(strip_tags($news->description), 120, '...') }}
+                </div>
+                <div class="news-date">Published: {{ \Carbon\Carbon::parse($news->date)->format('M d, Y') }}</div>
+            </div>
+        @empty
+            <p class="text-center text-muted">No news articles available at the moment.</p>
+        @endforelse
+    </div>
+</div>
+
 
 
 
