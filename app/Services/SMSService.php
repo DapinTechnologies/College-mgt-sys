@@ -62,67 +62,54 @@ class SMSService
         }
     }
 
-    public function sendSMS($apiKey, $recipients, $message, $isBulk = false)
-    {
-        $payload = [
-            'api_key' => $apiKey,
-            'serviceId' => $this->serviceId,
-            'from' => 'Dapin',
-            'date_send' => now()->format('Y-m-d H:i:s'),
-            'messages' => array_map(function($recipient) use ($message) {
-                return [
-                    'mobile' => (string)$recipient,  // Ensure this is a string
-                    'message' => $message,
-                    'client_ref' => rand(10000, 99999)
-                ];
-            }, $recipients)
+
+  public function sendSMS($apiKey, $recipients, $message, $isBulk = false)
+{
+    $payload = [
+        'api_key' => $apiKey,
+        'serviceId' => $this->serviceId,
+        'from' => 'Dapin',
+        'date_send' => now()->format('Y-m-d H:i:s'),
+        'messages' => []
+    ];
+
+    foreach ($recipients as $recipient) {
+        $payload['messages'][] = [
+            'mobile' => (string)$recipient, // Ensure mobile is a string
+            'message' => $message,
+            'client_ref' => (string)rand(10000, 99999) // Ensure client_ref is a string
         ];
-    
-        Log::info('Sending SMS with payload:', ['payload' => $payload]);
-    
-        try {
-            $response = Http::timeout(30)->post($this->apiUrl, $payload); // Increased timeout
-    
-            // Log the full response for debugging
-            Log::info('Full SMS API Response:', ['response' => $response->body()]);
-    
-            $responseJson = $response->json();
-            $status = 'Failed'; // Default status
-            if ($response->successful() && isset($responseJson['status']) && $responseJson['status'] == 'success') {
-                $status = 'Success';
-            } elseif (isset($responseJson['messages'])) {
-                // Check detailed statuses within the response
-                $allSuccessful = true;
-                foreach ($responseJson['messages'] as $msgStatus) {
-                    if ($msgStatus['status'] != 'success') {
-                        $allSuccessful = false;
-                        Log::warning('SMS to recipient failed', ['recipient' => $msgStatus['mobile'], 'status' => $msgStatus]);
-                    }
-                }
-                $status = $allSuccessful ? 'Success' : 'Partial Failure';
-            }
-    
-            foreach ($recipients as $recipient) {
-                SMSMessage::create([
-                    'phone_number' => $recipient,
-                    'message' => $message,
-                    'is_bulk' => $isBulk,
-                    'status' => $status,
-                    'sent_at' => now(),
-                    'api_configuration_id' => SmsConfiguration::first()->id,
-                ]);
-            }
-    
-            if ($status == 'Failed') {
-                Log::error('Failed to send SMS:', ['response' => $response->body()]);
-            }
-    
-            return ['status' => $status, 'remaining_credits' => $this->checkBalance($apiKey)];
-        } catch (\Exception $e) {
-            Log::error('Error sending SMS:', ['error' => $e->getMessage()]);
-            return ['status' => 'Failed', 'error' => $e->getMessage()];
-        }
     }
+
+    Log::info('Sending SMS Payload:', ['payload' => json_encode($payload)]);
+
+    try {
+        $client = new \GuzzleHttp\Client(['verify' => false]); // Disable SSL verification
+
+        $response = $client->post($this->apiUrl, [
+            'json' => $payload, // Ensures the correct JSON format
+            'headers' => [
+                'Content-Type' => 'application/json', // Explicitly set the content type
+                'Accept' => 'application/json'
+            ]
+        ]);
+
+        $responseJson = json_decode($response->getBody(), true);
+
+        Log::info('Full SMS API Response:', ['response' => $responseJson]);
+
+        if ($response->getStatusCode() === 200 && isset($responseJson['status_code']) && $responseJson['status_code'] == 1000) {
+            return ['status' => 'Success', 'remaining_credits' => $responseJson['credit_balance'] ?? 'Unknown'];
+        } else {
+            Log::error('SMS API Error:', ['response' => $responseJson]);
+            return ['status' => 'Failed', 'error' => $responseJson['status_desc'] ?? 'Unknown error'];
+        }
+    } catch (\Exception $e) {
+        Log::error('SMS API Exception:', ['error' => $e->getMessage()]);
+        return ['status' => 'Failed', 'error' => $e->getMessage()];
+    }
+}
+
     
 
     

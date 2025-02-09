@@ -293,148 +293,79 @@ public function showBalance(SMSService $smsService)
        
     
 
-    
+public function sendIndividual(Request $request)
+{
+    // Validate the form data
+    $request->validate([
+        'student_id' => 'required|exists:students,id',
+        'message' => 'required|string',
+    ]);
 
-    // public function send(Request $request)
-    // {
-    //     // Validate the request
-    //     $request->validate([
-    //         'message' => 'required|string',
-    //     ]);
-    
-    //     // Check if "All Students" is selected
-    //     if ($request->has('all_students') && $request->all_students == 1) {
-    //         // Get all students
-    //         $students = Student::all();
-    //     } else {
-    //         // Validate selected students if not sending to all
-    //         $request->validate([
-    //             'students' => 'required|array',
-    //         ]);
-    
-    //         // Get the selected students
-    //         $students = Student::whereIn('id', $request->students)->get();
-    //     }
-    
-    //     $messageTemplate = $request->message;
-    
-    //     // Loop through students and send the message
-    //     foreach ($students as $student) {
-    //         // Replace placeholders with student-specific details
-    //         $message = str_replace(
-    //             [
-    //                 '[first_name]', '[last_name]', '[student_id]', '[batch]', '[faculty]', 
-    //                 '[program]', '[session]', '[semester]', '[section]', '[father_name]', 
-    //                 '[mother_name]', '[email]', '[phone]'
-    //             ],
-    //             [
-    //                 $student->first_name, $student->last_name, $student->student_id, $student->batch, 
-    //                 $student->faculty, $student->program, $student->session, $student->semester, 
-    //                 $student->section, $student->father_name, $student->mother_name, $student->email, 
-    //                 $student->phone
-    //             ],
-    //             $messageTemplate
-    //         );
-    
-    //         // Send SMS using the `sendSms` method
-    //         $this->sendSms($student->phone, $message);
-    //     }
-    
-    //     // Redirect back with a success message
-    //     return redirect()->back()->with('success', 'Bulk SMS sent successfully!');
-    // }
-    public function sendIndividual(Request $request)
-    {
-        // Validate the form data
-        $request->validate([
-            'student_id' => 'required|exists:students,id',
-            'message' => 'required|string',
-        ]);
-    
-        $student = Student::find($request->student_id);
-    
-        $message = str_replace(
-            ['[first_name]', '[last_name]', '[student_id]'],
-            [$student->first_name, $student->last_name, $student->student_id],
-            $request->message
-        );
-    
-        // Retrieve the SMS API configuration from the database
-        $smsConfig = SmsConfiguration::first(); // Assuming the configuration is stored in the first row
-    
-        // Check if configuration exists
-        if (!$smsConfig) {
-            Log::error('SMS configuration not found in the database.');
-            return redirect()->back()->with('error', 'SMS configuration not found.');
-        }
-    
-        try {
-            // Prepare the data for the API request
-            $data = [
-                'api_key' => $smsConfig->api_key,
-                'serviceId' => $smsConfig->service_id,
-                'from' => 'Dapin', // Replace with an approved sender ID
-                'messages' => [
-                    [
-                        'mobile' => $student->phone,
-                        'message' => $message,
-                        'client_ref' => rand(10000, 99999)
-                    ]
-                ]
-            ];
-    
-            // Send SMS using Http client with increased timeout
-            $response = Http::timeout(120)->post($smsConfig->api_url, $data);
-    
-            // Log the response
-            Log::info('SMS Response Full Data:', ['response' => $response->json()]);
-    
-            // Check if the response structure is as expected
-            if (!isset($response->json()['status_code']) || $response->json()['status_code'] != 1000) {
-                Log::error('Unexpected API response structure or Invalid Credentials', ['response' => $response->json()]);
-                return redirect()->back()->with('error', 'Failed to send SMS. Please check the API credentials and try again.');
-            }
-    
-            // Save SMS message in the database
-            SMSMessage::create([
-                'phone_number' => $student->phone,
-                'message' => $message,
-                'is_bulk' => false,
-                'status' => $response->json()['status_code'] == 1000 ? 'Success' : 'Failed',
-                'sent_at' => now(),
-                'api_configuration_id' => $smsConfig->id,
-            ]);
-    
-            return redirect()->back()->with('success', 'SMS sent successfully!');
-    
-        } catch (\Exception $e) {
-            Log::error('Error sending SMS: ', ['error' => $e->getMessage()]);
-            return redirect()->back()->with('error', 'Failed to send SMS. Please try again.');
-        }
+    $student = Student::find($request->student_id);
+
+    $message = str_replace(
+        ['[first_name]', '[last_name]', '[student_id]'],
+        [$student->first_name, $student->last_name, $student->student_id],
+        $request->message
+    );
+
+    // Retrieve SMS API configuration
+    $smsConfig = SmsConfiguration::first();
+    if (!$smsConfig) {
+        Log::error('SMS configuration not found.');
+        return redirect()->back()->with('error', 'SMS configuration not found.');
     }
-    
-    
-// public function sendIndividual(Request $request)
-// {
-//     // Validate the form data
-//     $request->validate([
-//         'student_id' => 'required|exists:students,id',
-//         'message' => 'required|string',
-//     ]);
 
+    // Prepare data for API request
+    $data = [
+        'api_key' => $smsConfig->api_key,
+        'serviceId' => $smsConfig->service_id,
+        'from' => 'Dapin', 
+        'messages' => [
+            [
+                'mobile' => (string) $student->phone,  // Ensure phone is a string
+                'message' => $message,
+                'client_ref' => (string) rand(10000, 99999)  // Ensure client_ref is a string
+            ]
+        ]
+    ];
 
-//     $student = Student::find($request->student_id);
+    Log::info('Sending SMS Request:', ['url' => $smsConfig->api_url, 'payload' => json_encode($data)]);
 
-  
-//     $message = str_replace(
-//         ['[first_name]', '[last_name]', '[student_id]'],
-//         [$student->first_name, $student->last_name, $student->student_id],
-//         $request->message
-//     );
+    try {
+        // Send SMS using Http client with increased timeout
+        $response = Http::withOptions([
+            'verify' => false,  // Bypass SSL verification
+        ])->timeout(120)->post($smsConfig->api_url, $data);
 
-//     $this->sendSms($student->phone, $message);
-//     return redirect()->back()->with('success', 'Bulk SMS sent successfully!');
-// }
+        // Log full response
+        Log::info('Full SMS API Response:', ['response' => $response->body()]);
+
+        $responseJson = $response->json();
+
+        // Check if the response structure is correct
+        if (!isset($responseJson['status_code']) || $responseJson['status_code'] != 1000) {
+            Log::error('Unexpected API response structure:', ['response' => $responseJson]);
+            return redirect()->back()->with('error', 'Failed to send SMS. Please check the API credentials.');
+        }
+
+        // Save SMS message in the database
+        SMSMessage::create([
+            'phone_number' => $student->phone,
+            'message' => $message,
+            'is_bulk' => false,
+            'status' => 'Success',
+            'sent_at' => now(),
+            'api_configuration_id' => $smsConfig->id,
+        ]);
+
+        return redirect()->back()->with('success', 'SMS sent successfully!');
+
+    } catch (\Exception $e) {
+        Log::error('Error sending SMS:', ['error' => $e->getMessage()]);
+        return redirect()->back()->with('error', 'Failed to send SMS. Please try again.');
+    }
+}
 
 
 
@@ -473,13 +404,6 @@ public function sendSmsNotification($student)
     Log::info('SMS Response:', ['response' => $response->json()]);
 }
 
-
-// public function showDashboard(SMSService $smsService)
-// {
-//     $apiKey = config('services.sms.api_key');
-//     $credits = $smsService->checkBalance($apiKey);
-//     return view('admin.credit', compact('credits'));
-// }
 
 public function showCredits(SmsService $smsService)
  { 
