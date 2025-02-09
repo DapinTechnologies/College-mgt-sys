@@ -166,7 +166,7 @@ return [
         /*
          * Package Service Providers...
          */
-        Intervention\Image\ImageServiceProvider::class,
+       
         Yoeunes\Toastr\ToastrServiceProvider::class,
         Spatie\Permission\PermissionServiceProvider::class,
         Milon\Barcode\BarcodeServiceProvider::class,
@@ -239,7 +239,7 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
 
         //Image
-        'Image' => Intervention\Image\Facades\Image::class,
+    
         //Barcode
         'DNS1D' => Milon\Barcode\Facades\DNS1DFacade::class,
         'DNS2D' => Milon\Barcode\Facades\DNS2DFacade::class,

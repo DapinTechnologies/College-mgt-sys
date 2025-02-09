@@ -140,7 +140,117 @@
         margin-bottom: 10px; /* Add spacing for better visibility */
     }
 }
+/* ==============================
+   Uniform Header Background (Full Width)
+================================= */
 
+.header-top {
+    background-color: #ff6600; /* Set this to your preferred color */
+    color: white;
+    padding: 10px 0;
+    width: 100%; /* Ensure it spans full width */
+}
+
+/* Ensure full-width container */
+.header-top .container {
+    max-width: 100%;
+}
+
+/* Make sure the row aligns all items properly */
+.header-top .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+}
+
+/* ==============================
+   Social Media Icons (Left)
+================================= */
+.header-social {
+    display: flex;
+    align-items: center;
+}
+
+.header-social a {
+    color: white;
+    margin-right: 15px;
+    font-size: 16px;
+}
+
+.header-social a:hover {
+    color: #ffcc00; /* Hover effect */
+}
+
+/* ==============================
+   Contact Info (Phone & Email on Right)
+================================= */
+.header-cta ul {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.header-cta ul li {
+    margin-left: 20px; /* Space between phone and email */
+}
+
+.header-cta .call-box {
+    display: flex;
+    align-items: center;
+}
+
+.header-cta .call-box .icon img {
+    filter: brightness(0) invert(1); /* Make icons white */
+}
+
+.header-cta .call-box .text a {
+    color: white;
+    font-weight: bold;
+}
+
+/* ==============================
+   Responsive Fixes (Mobile)
+================================= */
+@media (max-width: 991px) {
+    .header-top .row {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .header-social {
+        justify-content: center;
+        margin-bottom: 10px;
+    }
+
+    .header-cta ul {
+        justify-content: center;
+        flex-direction: column;
+    }
+
+    .header-cta ul li {
+        margin: 5px 0;
+    }
+}
+
+.header-top.second-header {
+    color: your-color !important; /* Changes text color */
+}
+
+.header-top.second-header a {
+    color: your-color !important; /* Changes link colors */
+}
+
+.header-top.second-header .fab {
+    color: your-color !important; /* Changes social media icon colors */
+}
+
+.header-top.second-header .call-box img {
+    filter: brightness(0) invert(1); /* Ensures icons match the chosen color (if white) */
+}
 
 </style>
 
@@ -155,6 +265,8 @@
 
  	<!-- header -->
     <header class="header-area header-three">  
+       
+
        <div class="header-top second-header d-none d-md-block">
             <div class="container">
                 <div class="row align-items-center">      
@@ -359,7 +471,7 @@
                             </div>
                         </div>
                     </div>
-
+                  
                     <div class="col-xl-4 col-lg-4 col-sm-6">
                         <div class="footer-widget mb-30">
                             <div class="f-widget-title">
