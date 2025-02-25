@@ -259,6 +259,47 @@
 
 
 </style>
+<style>
+    .custom-container {
+        max-width: 800px; /* Adjust as needed */
+        margin: 0 auto;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    .header-link {
+    color: #007bff; /* Change link color as desired */
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.header-link:hover {
+    color: #0056b3;
+    text-decoration:underline
+}
+
+
+/* Ensure the login container is a flex container */
+.login {
+    display: flex;
+    gap: 10px; /* Adjust the gap between items as needed */
+    align-items: center;
+}
+
+/* Add a separator after each link except the last one */
+.login .second-header-link:not(:last-child)::after {
+    content: "|";
+    margin-left: 10px;
+    margin-right: 10px;
+    color: #000; /* Customize color as needed */
+}
+
+/* Optionally, adjust font size for small-link */
+.small-link {
+    font-size: 0.85em;
+}
+
+</style>
 
     
 
@@ -273,59 +314,60 @@
     <header class="header-area header-three">  
        
 
-       <div class="header-top second-header d-none d-md-block">
-            <div class="container">
-                <div class="row align-items-center">      
-                   
-                    <div class="col-lg-4 col-md-4 d-none d-lg-block ">
+        <div class="header-top second-header d-none d-md-block">
+            <div class="container custom-container">
+                <div class="row align-items-center">
+                    <!-- Social media column -->
+                    <div class="col-lg-4 col-md-4 d-none d-lg-block">
                         @if(isset($topbarSetting) && $topbarSetting->social_status == 1)
                         <div class="header-social">
                             <span>
-                            @if(isset($socialSetting->facebook))
-                            <a href="{{ $socialSetting->facebook }}" target="_blank"><i class="fab fa-facebook-f"></i></a>
-                            @endif
-                            @if(isset($socialSetting->instagram))
-                            <a href="{{ $socialSetting->instagram }}" target="_blank"><i class="fab fa-instagram"></i></a>
-                            @endif
-                            @if(isset($socialSetting->twitter))
-                            <a href="{{ $socialSetting->twitter }}" target="_blank"><i class="fab fa-twitter"></i></a>
-                            @endif
-                            @if(isset($socialSetting->linkedin))
-                            <a href="{{ $socialSetting->linkedin }}" target="_blank"><i class="fab fa-linkedin-in"></i></a>
-                            @endif
-                            @if(isset($socialSetting->pinterest))
-                            <a href="{{ $socialSetting->pinterest }}" target="_blank"><i class="fab fa-pinterest"></i></a>
-                            @endif
-                            @if(isset($socialSetting->youtube))
-                            <a href="{{ $socialSetting->youtube }}" target="_blank"><i class="fab fa-youtube"></i></a>
-                            @endif
-                           </span>                    
-                           <!--  /social media icon redux -->                               
+                                @if(isset($socialSetting->facebook))
+                                <a href="{{ $socialSetting->facebook }}" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                                @endif
+                                @if(isset($socialSetting->instagram))
+                                <a href="{{ $socialSetting->instagram }}" target="_blank"><i class="fab fa-instagram"></i></a>
+                                @endif
+                                @if(isset($socialSetting->twitter))
+                                <a href="{{ $socialSetting->twitter }}" target="_blank"><i class="fab fa-twitter"></i></a>
+                                @endif
+                                @if(isset($socialSetting->linkedin))
+                                <a href="{{ $socialSetting->linkedin }}" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+                                @endif
+                                @if(isset($socialSetting->pinterest))
+                                <a href="{{ $socialSetting->pinterest }}" target="_blank"><i class="fab fa-pinterest"></i></a>
+                                @endif
+                                @if(isset($socialSetting->youtube))
+                                <a href="{{ $socialSetting->youtube }}" target="_blank"><i class="fab fa-youtube"></i></a>
+                                @endif
+                            </span>
                         </div>
                         @endif
                     </div>
-
-                    <div class="col-lg-8 col-md-8 d-none d-lg-block text-right">
+        
+                    <!-- Admission & E-Learning links and contact details -->
+                    <div class="col-lg-8 col-md-8 d-none d-lg-block">
                         <div class="header-cta">
-                            <ul>
+                            <ul style="list-style: none; padding: 0; margin: 0;">
                                 <li>
-                                    <div class="col-xl-3 col-lg-3 text-right d-none d-lg-block text-right text-xl-right">
-                                        @php 
+                                    @php 
                                         $application = App\Models\ApplicationSetting::status(); 
-                                        @endphp
-                                        @isset($application)
-                                        <div class="login" style="display: flex; gap: 10px; align-items: center;">
-                                            <div class="second-header-btn">
-                                                <a href="{{ route('application.index') }}" target="_blank" class="btn">{{ __('navbar_admission') }}</a>
-                                            </div>
-                                            <div class="second-header-btn">
-                                                <a href="" target="_blank" class="btn">{{ __('E-Learning Portal') }}</a>
-                                            </div>
+                                    @endphp
+                                    @isset($application)
+                                    <div class="login">
+                                        <div class="second-header-link">
+                                            <a href="{{ route('application.index') }}" target="_blank" class="header-link">
+                                                {{ __('navbar_admission') }}
+                                            </a>
                                         </div>
-                                        @endisset
+                                        <div class="second-header-link">
+                                            <a href="" target="_blank" class="header-link small-link">
+                                                {{ __('eLearning') }}
+                                            </a>
+                                        </div>
                                     </div>
+                                    @endisset
                                 </li>
-                    
                                 @isset($topbarSetting->phone)
                                 <li>
                                     <div class="call-box">
@@ -334,13 +376,14 @@
                                         </div>
                                         <div class="text">
                                             <strong>
-                                                <a href="tel:{{ str_replace(' ', '', $topbarSetting->phone ?? '') }}">{{ $topbarSetting->phone ?? '' }}</a>
+                                                <a href="tel:{{ str_replace(' ', '', $topbarSetting->phone ?? '') }}">
+                                                    {{ $topbarSetting->phone ?? '' }}
+                                                </a>
                                             </strong>
                                         </div>
                                     </div>
                                 </li>
                                 @endisset
-                    
                                 @isset($topbarSetting->email)
                                 <li>
                                     <div class="call-box">
@@ -349,7 +392,9 @@
                                         </div>
                                         <div class="text">
                                             <strong>
-                                                <a href="mailto:{{ $topbarSetting->email ?? '' }}">{{ $topbarSetting->email ?? '' }}</a>
+                                                <a href="mailto:{{ $topbarSetting->email ?? '' }}">
+                                                    {{ $topbarSetting->email ?? '' }}
+                                                </a>
                                             </strong>
                                         </div>
                                     </div>
@@ -360,15 +405,12 @@
                     </div>
                     
 
-                       
 
-
-                    </div>
-                    
-                </div>
-            </div>
-        </div>    
-
+                </div> <!-- /.row -->
+            </div> <!-- /.container -->
+        </div>
+        
+        
 
         <div id="header-sticky" class="menu-area">
             <div class="container">

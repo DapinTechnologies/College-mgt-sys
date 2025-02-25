@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
  use App\Models\Director;
+ use App\Models\AboutUs;
  use Illuminate\Support\Facades\Storage;
 class DirectorController extends Controller
 {
@@ -83,7 +84,8 @@ class DirectorController extends Controller
 
 public function About(){
     //dd('About');
-    return view('web.about');
+    $about = AboutUs::first();
+    return view('web.about',compact('about'));
 }
 
 
