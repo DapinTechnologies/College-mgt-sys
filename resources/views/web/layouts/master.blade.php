@@ -145,7 +145,7 @@
 ================================= */
 
 .header-top {
-    background-color: #ff6600; /* Set this to your preferred color */
+    background-color:#225691; /* Set this to your preferred color */
     color: white;
     padding: 10px 0;
     width: 100%; /* Ensure it spans full width */
@@ -236,21 +236,27 @@
     }
 }
 
+/* Ensure entire header has the same background */
 .header-top.second-header {
-    color: your-color !important; /* Changes text color */
+    background-color:#225691 !important; /* Change to match the footer */
+    color: #ffffff !important;
 }
 
-.header-top.second-header a {
-    color: your-color !important; /* Changes link colors */
+/* Ensure social media section inherits the same background */
+.header-top.second-header .header-social {
+    background-color: #225691!important; /* Matches the header */
+    padding: 5px 0; /* Adjust spacing if needed */
 }
 
-.header-top.second-header .fab {
-    color: your-color !important; /* Changes social media icon colors */
+/* Ensure icons and links have correct colors */
+.header-top.second-header .header-social a {
+    color: rgb(245, 247, 242) !important; /* Adjust icon color */
 }
 
-.header-top.second-header .call-box img {
-    filter: brightness(0) invert(1); /* Ensures icons match the chosen color (if white) */
+.header-top.second-header .header-social a:hover {
+    color: #fc7e2a !important; /* Hover effect */
 }
+
 
 </style>
 
@@ -302,32 +308,61 @@
                     <div class="col-lg-8 col-md-8 d-none d-lg-block text-right">
                         <div class="header-cta">
                             <ul>
-                               @isset($topbarSetting->phone)
-                               <li>
-                                  <div class="call-box">
-                                     <div class="icon">
-                                        <img src="{{ asset('web/img/icon/phone-call.png') }}" alt="img">
-                                     </div>
-                                     <div class="text">
-                                        <strong><a href="tel:{{ str_replace(' ', '', $topbarSetting->phone ?? '') }}">{{ $topbarSetting->phone ?? '' }}</a></strong>
-                                     </div>
-                                  </div>
-                               </li>
-                               @endisset
-                               @isset($topbarSetting->email)
-                               <li>
-                                  <div class="call-box">
-                                     <div class="icon">
-                                        <img src="{{ asset('web/img/icon/mailing.png') }}" alt="img">
-                                     </div>
-                                     <div class="text">
-                                        <strong><a href="mailto:{{ $topbarSetting->email ?? '' }}">{{ $topbarSetting->email ?? '' }}</a></strong>
-                                     </div>
-                                  </div>
-                               </li>
-                               @endisset
+                                <li>
+                                    <div class="col-xl-3 col-lg-3 text-right d-none d-lg-block text-right text-xl-right">
+                                        @php 
+                                        $application = App\Models\ApplicationSetting::status(); 
+                                        @endphp
+                                        @isset($application)
+                                        <div class="login" style="display: flex; gap: 10px; align-items: center;">
+                                            <div class="second-header-btn">
+                                                <a href="{{ route('application.index') }}" target="_blank" class="btn">{{ __('navbar_admission') }}</a>
+                                            </div>
+                                            <div class="second-header-btn">
+                                                <a href="" target="_blank" class="btn">{{ __('E-Learning Portal') }}</a>
+                                            </div>
+                                        </div>
+                                        @endisset
+                                    </div>
+                                </li>
+                    
+                                @isset($topbarSetting->phone)
+                                <li>
+                                    <div class="call-box">
+                                        <div class="icon">
+                                            <img src="{{ asset('web/img/icon/phone-call.png') }}" alt="img">
+                                        </div>
+                                        <div class="text">
+                                            <strong>
+                                                <a href="tel:{{ str_replace(' ', '', $topbarSetting->phone ?? '') }}">{{ $topbarSetting->phone ?? '' }}</a>
+                                            </strong>
+                                        </div>
+                                    </div>
+                                </li>
+                                @endisset
+                    
+                                @isset($topbarSetting->email)
+                                <li>
+                                    <div class="call-box">
+                                        <div class="icon">
+                                            <img src="{{ asset('web/img/icon/mailing.png') }}" alt="img">
+                                        </div>
+                                        <div class="text">
+                                            <strong>
+                                                <a href="mailto:{{ $topbarSetting->email ?? '' }}">{{ $topbarSetting->email ?? '' }}</a>
+                                            </strong>
+                                        </div>
+                                    </div>
+                                </li>
+                                @endisset
                             </ul>
-                        </div>                        
+                        </div>
+                    </div>
+                    
+
+                       
+
+
                     </div>
                     
                 </div>
@@ -365,7 +400,7 @@
                                         </li>
                                         
                                         <li class="{{ Request::is('about*') ? 'current' : '' }}">
-                                            <a href="#">{{ __('About Us') }}</a>
+                                            <a href="{{route('aboutus')}}">{{ __('About Us') }}</a>
                                         </li>
                                         
                                         {{-- <li class="{{ Request::is('elearning*') ? 'current' : '' }}">
@@ -376,22 +411,7 @@
                             </div>
                         </div>
 
-                        <div class="col-xl-3 col-lg-3 text-right d-none d-lg-block text-right text-xl-right">
-                            @php 
-                            $application = App\Models\ApplicationSetting::status(); 
-                            @endphp
-                            @isset($application)
-                            <div class="login">
-                                <ul>
-                                    <li>
-                                        <div class="second-header-btn">
-                                           <a href="{{ route('application.index') }}" target="_blank" class="btn">{{ __('navbar_admission') }}</a>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </div>
-                            @endisset
-                        </div>
+                      
                         
                         <div class="col-12">
                             <div class="mobile-menu"></div>

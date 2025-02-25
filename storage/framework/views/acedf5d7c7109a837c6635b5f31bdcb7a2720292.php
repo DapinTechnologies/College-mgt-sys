@@ -22,281 +22,328 @@
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css"/>
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css"/>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
 <style>
-//* General Styles */
-body {
-    font-family: 'Arial', sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f8f9fa;
-}
-
-/* Reduce margin & padding of sections */
-.container {
-    max-width: 1200px;
-    margin: 10px auto;
-    padding: 10px 15px;
-}
-
-h2 {
-    text-align: center;
-    color: #333;
-    font-size: 24px;
-    margin-bottom: 10px; /* Reduced margin */
-}
-
-/* Reduce padding in sections */
-.pt-120, .pb-120 {
-    padding-top: 30px !important; /* Reduced padding */
-    padding-bottom: 30px !important; /* Reduced padding */
-}
-
-/* Compact Grid Layout */
-.courses-container, .news-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 10px;
-    padding: 10px;
-}
-
-/* Course & News Card */
-.course-card, .news-card {
-    background: #ffffff;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
-    padding: 10px;
-    transition: transform 0.2s ease-in-out;
-    border-left: 4px solid #ff6600;
-}
-
-.course-card:hover, .news-card:hover {
-    transform: translateY(-3px);
-    background: #f6f6f6;
-}
-
-/* Text Styling */
-.course-title, .news-title {
-    font-size: 16px;
-    font-weight: bold;
-    color: #007bff;
-    margin-bottom: 5px;
-}
-
-.course-info, .news-description {
-    font-size: 13px;
-    color: #555;
-    margin-bottom: 5px;
-}
-
-/* Fee & Date Text */
-.fee, .news-date {
-    font-size: 14px;
-    font-weight: bold;
-    color: #28a745;
-}
-
-/* Director Image */
-.director-image {
-    width: 300px;
-    height: 300px;
-    object-fit: cover;
-    border-radius: 10px;
-    display: block;
-}
-
-/* Responsive Adjustments */
-@media (max-width: 1024px) {
-    .courses-container, .news-container {
-        grid-template-columns: repeat(3, 1fr);
+    /* General Styles */
+    body {
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f8f9fa;
     }
-}
 
-@media (max-width: 768px) {
-    .courses-container, .news-container {
-        grid-template-columns: repeat(2, 1fr);
+    .container {
+        max-width: 1200px;
+        margin: 10px auto;
+        padding: 10px 15px;
     }
-}
 
-@media (max-width: 500px) {
-    .courses-container, .news-container {
-        grid-template-columns: repeat(1, 1fr);
+    h2 {
+        text-align: center;
+        color: #333;
+        font-size: 24px;
+        margin-bottom: 10px;
     }
-}
 
-/* Reduce spacing for the Director's Message section */
-.about-area.about-p {
-    padding-top: 20px !important; /* Reduced padding */
-    padding-bottom: 20px !important; /* Reduced padding */
-}
+    .pt-120, .pb-120 {
+        padding-top: 30px !important;
+        padding-bottom: 30px !important;
+    }
 
-.about-content {
-    padding-top: 10px !important;
-    padding-bottom: 10px !important;
-}
+    .courses-container, .news-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 10px;
+        padding: 10px;
+    }
 
-.director-image {
-    width: 280px;
-    height: 280px;
-    object-fit: cover;
-    margin-bottom: 10px !important;
-}
+    .course-card, .news-card {
+        background: #ffffff;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+        padding: 10px;
+        transition: transform 0.2s ease-in-out;
+        border-left: 4px solid #ff6600;
+    }
 
-.about-content h2,
-.about-content h5,
-.about-content p {
-    margin-bottom: 8px !important;
-}
+    .course-card:hover, .news-card:hover {
+        transform: translateY(-3px);
+        background: #f6f6f6;
+    }
 
-.about-area .row {
-    margin-bottom: 10px !important;
-}
+    .course-title, .news-title {
+        font-size: 16px;
+        font-weight: bold;
+        color: #007bff;
+        margin-bottom: 5px;
+    }
 
-@media (max-width: 768px) {
-    .about-area.about-p {
-        padding-top: 15px !important; /* Further reduced padding */
-        padding-bottom: 15px !important; /* Further reduced padding */
+    .course-info, .news-description {
+        font-size: 13px;
+        color: #555;
+        margin-bottom: 5px;
+    }
+
+    .fee, .news-date {
+        font-size: 14px;
+        font-weight: bold;
+        color: #28a745;
     }
 
     .director-image {
-        width: 250px;
-        height: 250px;
-        margin-bottom: 5px !important;
+        width: 300px;
+        height: 300px;
+        object-fit: cover;
+        border-radius: 10px;
+        display: block;
+    }
+
+    @media (max-width: 1024px) {
+        .courses-container, .news-container {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .courses-container, .news-container {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 500px) {
+        .courses-container, .news-container {
+            grid-template-columns: repeat(1, 1fr);
+        }
+    }
+
+    .about-area.about-p {
+        padding-top: 20px !important;
+        padding-bottom: 20px !important;
     }
 
     .about-content {
-        padding-top: 5px !important;
-        padding-bottom: 5px !important;
+        padding-top: 10px !important;
+        padding-bottom: 10px !important;
     }
-}
 
-/* Improved Layout for Director's Message */
-.director-message {
-    background: linear-gradient(to right, #f8f8f8, #ff6600);
-    color: white;
-    padding: 20px 0; /* Reduced padding */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+    .director-image {
+        width: 280px;
+        height: 280px;
+        object-fit: cover;
+        margin-bottom: 10px !important;
+    }
 
-/* Flexbox for Better Alignment */
-.director-content {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    gap: 30px; /* Reduced gap */
-    max-width: 1200px;
-    margin: auto;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    padding: 15px; /* Reduced padding */
-    box-shadow: 0px 5px 15px #ff6600;
-}
+    .about-content h2,
+    .about-content h5,
+    .about-content p {
+        margin-bottom: 8px !important;
+    }
 
-/* Director Image Styling */
-.director-image img {
-    width: 280px; /* Reduced size */
-    height: 280px; /* Reduced size */
-    object-fit: cover;
-    border-radius: 50%;
-    box-shadow: 2px 4px 10px #ff6600;
-    border: 4px solid white;
-}
+    .about-area .row {
+        margin-bottom: 10px !important;
+    }
 
-/* Director's Message Styling */
-.director-text {
-    max-width: 500px;
-}
+    @media (max-width: 768px) {
+        .about-area.about-p {
+            padding-top: 15px !important;
+            padding-bottom: 15px !important;
+        }
 
-.director-text h5 {
-    font-size: 1.2em;
-    margin-bottom: 8px; /* Reduced margin */
-}
+        .about-content {
+            padding-top: 5px !important;
+            padding-bottom: 5px !important;
+        }
+    }
 
-.director-text h2 {
-    font-size: 2em;
-    margin-bottom: 8px; /* Reduced margin */
-}
+    /* Director's Message Section */
+    .director-message {
+        background: white; /* Changed to white */
+        color: #333; /* Dark text for contrast */
+        padding: 20px 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 
-.director-text p {
-    font-size: 1.1em;
-    line-height: 1.6em;
-    margin-bottom: 8px; /* Reduced margin */
-}
-
-/* Responsive Adjustments */
-@media (max-width: 768px) {
     .director-content {
-        flex-direction: column;
-        text-align: center;
-        gap: 20px; /* Reduced gap */
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 30px;
+        max-width: 1200px;
+        margin: auto;
+        background: rgba(255, 255, 255, 0.9); /* Slightly transparent white */
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1); /* Subtle shadow */
     }
 
     .director-image img {
-        width: 200px; /* Further reduced size */
-        height: 200px; /* Further reduced size */
+        width: 500px;
+        height: 280px;
+        object-fit: cover;
+        border-radius: 50%;
+        box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+        border: 4px solid #ff6600;
     }
-}
 
-/* Statistics Section Styling */
-.statistics-area {
-    background: #f8f9fa;
-    padding: 40px 0; /* Reduced padding */
-}
-
-.statistic-card {
-    background: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    padding: 20px; /* Reduced padding */
-    text-align: center;
-    transition: transform 0.3s ease-in-out;
-}
-
-.statistic-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-}
-
-.statistic-icon {
-    font-size: 40px;
-    color: #ff6600;
-    margin-bottom: 15px;
-}
-
-.statistic-number {
-    font-size: 36px;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 10px;
-}
-
-.statistic-label {
-    font-size: 18px;
-    color: #555;
-    margin-bottom: 0;
-}
-
-/* Animation for Counting Numbers */
-@keyframes countUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
+    .director-text {
+        max-width: 500px;
     }
-    to {
-        opacity: 1;
-        transform: translateY(0);
+
+    .director-text h5 {
+        font-size: 1.2em;
+        margin-bottom: 8px;
+        color: #333; /* Dark text for contrast */
     }
-}
 
-.statistic-number {
-    animation: countUp 1s ease-in-out;
-}
+    .director-text h2 {
+        font-size: 2em;
+        margin-bottom: 8px;
+        color: #333; /* Dark text for contrast */
+    }
 
+    .director-text p {
+        font-size: 1.1em;
+        line-height: 1.6em;
+        margin-bottom: 8px;
+        color: #555; /* Slightly lighter text */
+    }
 
+    @media (max-width: 768px) {
+        .director-content {
+            flex-direction: column;
+            text-align: center;
+            gap: 20px;
+        }
+    }
 
-    </style>
+    /* Statistics Section */
+    .statistics-area {
+        background: #f8f9fa;
+        padding: 40px 0;
+    }
+
+    .statistic-card {
+        background: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        text-align: center;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .statistic-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .statistic-icon {
+        font-size: 40px;
+        color: #ff6600;
+        margin-bottom: 15px;
+    }
+
+    .statistic-number {
+        font-size: 36px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .statistic-label {
+        font-size: 18px;
+        color: #555;
+        margin-bottom: 0;
+    }
+
+    @keyframes countUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .statistic-number {
+        animation: countUp 1s ease-in-out;
+    }
+
+    /* News Section */
+    .news-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        padding: 20px;
+    }
+
+    .news-card {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .news-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .news-content {
+        padding: 20px;
+    }
+
+    .news-title {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #333;
+    }
+
+    .news-description {
+        font-size: 14px;
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 15px;
+    }
+
+    .news-date {
+        font-size: 12px;
+        color: #888;
+        display: flex;
+        align-items: center;
+    }
+
+    .news-date i {
+        margin-right: 5px;
+    }
+
+    .news-read-more {
+        display: block;
+        text-align: center;
+        padding: 10px;
+        background: #007bff;
+        color: #fff;
+        text-decoration: none;
+        font-size: 14px;
+        transition: background 0.3s ease;
+    }
+
+    .news-read-more:hover {
+        background: #0056b3;
+    }
+
+    .news-read-more i {
+        margin-left: 5px;
+    }
+</style>
+
 
 <?php $__env->startSection('content'); ?>
 
@@ -441,7 +488,12 @@ h2 {
         <div class="director-content">
             <!-- Director's Image -->
             <div class="director-image">
-                <img src="<?php echo e(asset('storage/'.$director->image)); ?>" alt="Director Image">
+                <img src="<?php echo e(url($director->image)); ?>" alt="Director Image">
+
+              
+
+                
+                
             </div>
 
             <!-- Director's Message -->
@@ -457,132 +509,7 @@ h2 {
     </div>
 </section>
 
-<style>
-    /* Improved Layout for Director's Message */
-.director-message {
-    background: linear-gradient(to right, #f8f8f8, #ff6600);
-    color: white;
-    padding: 40px 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
 
-/* Flexbox for Better Alignment */
-.director-content {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    gap: 40px;
-    max-width: 1200px;
-    margin: auto;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0px 5px 15px #ff6600;
-}
-
-/* Director Image Styling */
-.director-image img {
-    width: 280px;
-    height: 280px;
-    object-fit: cover;
-    border-radius: 50%;
-    box-shadow: 2px 4px 10px #ff6600;
-    border: 4px solid white;
-}
-
-/* Director's Message Styling */
-.director-text {
-    max-width: 500px;
-}
-
-.director-text h5 {
-    font-size: 1.2em;
-    margin-bottom: 10px;
-    color: #ffeedd;
-}
-
-.director-text h2 {
-    font-size: 2em;
-    margin-bottom: 10px;
-}
-
-.director-text p {
-    font-size: 1.1em;
-    line-height: 1.6em;
-    margin-bottom: 10px;
-}
-
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-    .director-content {
-        flex-direction: column;
-        text-align: center;
-        gap: 20px;
-    }
-
-    .director-image img {
-        width: 220px;
-        height: 220px;
-    }
-}
-/* Statistics Section Styling */
-.statistics-area {
-    background: #f8f9fa;
-    padding: 60px 0;
-}
-
-.statistic-card {
-    background: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    padding: 30px;
-    text-align: center;
-    transition: transform 0.3s ease-in-out;
-}
-
-.statistic-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-}
-
-.statistic-icon {
-    font-size: 40px;
-    color: #ff6600;
-    margin-bottom: 15px;
-}
-
-.statistic-number {
-    font-size: 36px;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 10px;
-}
-
-.statistic-label {
-    font-size: 18px;
-    color: #555;
-    margin-bottom: 0;
-}
-
-/* Animation for Counting Numbers */
-@keyframes countUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.statistic-number {
-    animation: countUp 1s ease-in-out;
-}
-</style>
 
 
         <?php if(isset($callToAction)): ?>
@@ -706,7 +633,7 @@ h2 {
             <div class="col-lg-3 col-md-6 col-sm-12">
                 <div class="statistic-card wow fadeInRight animated" data-animation="fadeInRight" data-delay=".6s">
                     <div class="statistic-icon">
-                        <i class="fas fa-chalkboard-teacher"></i>
+                        <i class="fa-solid fa-chalkboard-user"></i> 
                     </div>
                     <div class="statistic-content">
                         <h3 class="statistic-number" data-count="200">0</h3>
@@ -979,4 +906,4 @@ document.addEventListener("DOMContentLoaded", function () {
 <!-- Statistics Section -->
 
 <?php $__env->stopSection(); ?>
-<?php echo $__env->make('web.layouts.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\User\Desktop\business\backup\Dapin\stk -trial\Dapin\Dapin\resources\views/web/index.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('web.layouts.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\User\Desktop\business\latest Dapin\backup\Dapin\stk -trial\Dapin\Dapin\resources\views/web/index.blade.php ENDPATH**/ ?>

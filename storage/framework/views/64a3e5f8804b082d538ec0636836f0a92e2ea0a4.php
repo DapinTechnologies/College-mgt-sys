@@ -145,7 +145,7 @@
 ================================= */
 
 .header-top {
-    background-color: #ff6600; /* Set this to your preferred color */
+    background-color:#225691; /* Set this to your preferred color */
     color: white;
     padding: 10px 0;
     width: 100%; /* Ensure it spans full width */
@@ -238,13 +238,13 @@
 
 /* Ensure entire header has the same background */
 .header-top.second-header {
-    background-color:#fc7e2a !important; /* Change to match the footer */
+    background-color:#225691 !important; /* Change to match the footer */
     color: #ffffff !important;
 }
 
 /* Ensure social media section inherits the same background */
 .header-top.second-header .header-social {
-    background-color: #fc7e2a!important; /* Matches the header */
+    background-color: #225691!important; /* Matches the header */
     padding: 5px 0; /* Adjust spacing if needed */
 }
 
@@ -307,75 +307,58 @@
 
                     <div class="col-lg-8 col-md-8 d-none d-lg-block text-right">
                         <div class="header-cta">
-
-
                             <ul>
-
-                                        <li>
-                                              
-                        <div class="col-xl-3 col-lg-3 text-right d-none d-lg-block text-right text-xl-right">
-                            <?php 
-                            $application = App\Models\ApplicationSetting::status(); 
-                            ?>
-                            <?php if(isset($application)): ?>
-                            <div class="login">
-                                <ul>
-                                    <li>
-                                        <div class="second-header-btn">
-                                           <a href="<?php echo e(route('application.index')); ?>" target="_blank" class="btn"><?php echo e(__('navbar_admission')); ?></a>
-                                        </div>
-                                    </li>
-                                    
-                                        
-                                    
-                                </ul>
-                            </div>
-                            <?php endif; ?>
-                        </div>
-
-
-                                        </li>
-
                                 <li>
-                                    <div class="second-header-btn">
-                                        <a href="" target="_blank" class="btn"><?php echo e(__('E-Learning Portal')); ?></a>
-                                     </div>
-                                
+                                    <div class="col-xl-3 col-lg-3 text-right d-none d-lg-block text-right text-xl-right">
+                                        <?php 
+                                        $application = App\Models\ApplicationSetting::status(); 
+                                        ?>
+                                        <?php if(isset($application)): ?>
+                                        <div class="login" style="display: flex; gap: 10px; align-items: center;">
+                                            <div class="second-header-btn">
+                                                <a href="<?php echo e(route('application.index')); ?>" target="_blank" class="btn"><?php echo e(__('navbar_admission')); ?></a>
+                                            </div>
+                                            <div class="second-header-btn">
+                                                <a href="" target="_blank" class="btn"><?php echo e(__('E-Learning Portal')); ?></a>
+                                            </div>
+                                        </div>
+                                        <?php endif; ?>
+                                    </div>
                                 </li>
-
-
-
-                               <?php if(isset($topbarSetting->phone)): ?>
-                               <li>
-                                  <div class="call-box">
-                                     <div class="icon">
-                                        <img src="<?php echo e(asset('web/img/icon/phone-call.png')); ?>" alt="img">
-                                     </div>
-                                     <div class="text">
-                                        <strong><a href="tel:<?php echo e(str_replace(' ', '', $topbarSetting->phone ?? '')); ?>"><?php echo e($topbarSetting->phone ?? ''); ?></a></strong>
-                                     </div>
-                                  </div>
-                               </li>
-                               <?php endif; ?>
-                               <?php if(isset($topbarSetting->email)): ?>
-                               <li>
-                                  <div class="call-box">
-                                     <div class="icon">
-                                        <img src="<?php echo e(asset('web/img/icon/mailing.png')); ?>" alt="img">
-                                     </div>
-                                     <div class="text">
-                                        <strong><a href="mailto:<?php echo e($topbarSetting->email ?? ''); ?>"><?php echo e($topbarSetting->email ?? ''); ?></a></strong>
-                                     </div>
-                                  </div>
-
-                                  
-                               </li>
-                               <?php endif; ?>
-
-                             
+                    
+                                <?php if(isset($topbarSetting->phone)): ?>
+                                <li>
+                                    <div class="call-box">
+                                        <div class="icon">
+                                            <img src="<?php echo e(asset('web/img/icon/phone-call.png')); ?>" alt="img">
+                                        </div>
+                                        <div class="text">
+                                            <strong>
+                                                <a href="tel:<?php echo e(str_replace(' ', '', $topbarSetting->phone ?? '')); ?>"><?php echo e($topbarSetting->phone ?? ''); ?></a>
+                                            </strong>
+                                        </div>
+                                    </div>
+                                </li>
+                                <?php endif; ?>
+                    
+                                <?php if(isset($topbarSetting->email)): ?>
+                                <li>
+                                    <div class="call-box">
+                                        <div class="icon">
+                                            <img src="<?php echo e(asset('web/img/icon/mailing.png')); ?>" alt="img">
+                                        </div>
+                                        <div class="text">
+                                            <strong>
+                                                <a href="mailto:<?php echo e($topbarSetting->email ?? ''); ?>"><?php echo e($topbarSetting->email ?? ''); ?></a>
+                                            </strong>
+                                        </div>
+                                    </div>
+                                </li>
+                                <?php endif; ?>
                             </ul>
-                        </div>  
-                      
+                        </div>
+                    </div>
+                    
 
                        
 
@@ -596,4 +579,4 @@
     <script src="<?php echo e(asset('web/js/main.js')); ?>"></script>
 
  </body>
-</html><?php /**PATH C:\Users\User\Desktop\business\backup\Dapin\stk -trial\Dapin\Dapin\resources\views/web/layouts/master.blade.php ENDPATH**/ ?>
+</html><?php /**PATH C:\Users\User\Desktop\business\latest Dapin\backup\Dapin\stk -trial\Dapin\Dapin\resources\views/web/layouts/master.blade.php ENDPATH**/ ?>

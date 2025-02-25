@@ -26,12 +26,14 @@ class DirectorController extends Controller
         $imagePath = null;
         if ($request->hasFile('image')) {
             $image = $request->file('image');
-    
             // Generate a unique filename
             $filename = time().'_'.$image->getClientOriginalName();
     
-            // Store the image in the "public" disk under "uploads/director"
-            $imagePath = $image->storeAs('uploads/director', $filename, 'public');
+            // Move the file to the public/uploads/director directory
+            $image->move(public_path('uploads/director'), $filename);
+    
+            // Set the path relative to public
+            $imagePath = 'uploads/director/' . $filename;
         }
     
         // Store the director details in the database
@@ -43,10 +45,9 @@ class DirectorController extends Controller
         ]);
     
         return redirect()->route('directors.index')->with('success', 'Director message added successfully.');
+    }
 
-}
-
-public function update(Request $request, $id)
+    public function update(Request $request, $id)
 {
     $director = Director::findOrFail($id);
 
@@ -58,15 +59,16 @@ public function update(Request $request, $id)
     ]);
 
     if ($request->hasFile('image')) {
-        if ($director->image) {
-            Storage::disk('public')->delete($director->image);
+        // Delete the old image from public if it exists
+        if ($director->image && file_exists(public_path($director->image))) {
+            unlink(public_path($director->image));
         }
 
         $image = $request->file('image');
-        $filename = time() . '.' . $image->getClientOriginalExtension();
-        $imagePath = $image->storeAs('uploads/director', $filename, 'public');
+        $filename = time() . '_' . $image->getClientOriginalName();
+        $image->move(public_path('uploads/director'), $filename);
 
-        $director->image = $imagePath;
+        $director->image = 'uploads/director/' . $filename;
     }
 
     $director->update([
@@ -79,6 +81,10 @@ public function update(Request $request, $id)
     return redirect()->route('directors.index')->with('success', 'Director message updated successfully.');
 }
 
+public function About(){
+    //dd('About');
+    return view('web.about');
+}
 
 
 

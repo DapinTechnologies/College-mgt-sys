@@ -190,7 +190,10 @@ Route::post('/store/director',[DirectorController::class,'store'])->name('direct
 Route::put('/update/director/{id}', [DirectorController::class, 'update'])->name('directors.update');
 
 
-//DirectorController  directors.store directors.update
+Route::get('/home/about',[DirectorController::class,'About'])->name('aboutus');
+
+
+//DirectorController  directors.store directors.update  
 
 Route::get('/test/imagick', function () {
     if (class_exists('Imagick')) {

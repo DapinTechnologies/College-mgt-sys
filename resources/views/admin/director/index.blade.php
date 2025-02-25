@@ -60,14 +60,14 @@
                             </div>
 
                             @if(isset($director) && $director->image)
-                                <div class="mt-3">
-                                    <label>{{ __('Current Image') }}</label>
-                                    <div>
-                                        <img src="{{ asset('storage/'.$director->image) }}" alt="Director Image" width="80">
-                                    </div>
+                            <div class="mt-3">
+                                <label>{{ __('Current Image') }}</label>
+                                <div>
+                                    <img src="{{ asset($director->image) }}" alt="Director Image" width="80">
                                 </div>
-                            @endif
-
+                            </div>
+                        @endif
+                        
                             <!-- Form End -->
                         </div>
                         <div class="card-footer">
@@ -106,11 +106,12 @@
                                     <th>{{ __('Image') }}</th>
                                     <td>
                                         @if($director->image)
-                                            <img src="{{ asset('storage/'.$director->image) }}" alt="Director Image" width="100">
+                                            <img src="{{ asset($director->image) }}" alt="Director Image" width="100">
                                         @else
                                             <span class="text-muted">No Image</span>
                                         @endif
                                     </td>
+                                    
                                 </tr>
                             </table>
                         </div>

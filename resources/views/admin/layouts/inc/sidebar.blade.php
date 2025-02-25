@@ -141,29 +141,7 @@
 
         <!--------START OF SMS MANAGEMENT---------->
 
-        @canany(['director-view', 'director-create', 'director-edit', 'director-delete'])
-        <li class="nav-item pcoded-hasmenu {{ Request::is('admin/directors*') ? 'pcoded-trigger active' : '' }}">
-            <a href="#!" class="nav-link">
-                <span class="pcoded-micon"><i class="fas fa-user-tie"></i></span>
-                <span class="pcoded-mtext">Director Management</span>
-            </a>
-            <ul class="pcoded-submenu">
-                @can('director-view')
-                <li class="{{ Request::is('admin/directors') ? 'active' : '' }}">
-                    <a href="{{ route('directors.index') }}">{{ __('View Directors') }}</a>
-                </li>
-                @endcan
-    
-                @can('director-create')
-                <li class="{{ Request::is('admin/directors') ? 'active' : '' }}">
-                    <a href="{{ route('directors.index') }}">{{ __('Add New Director') }}</a>
-                </li>
-                @endcan
-            </ul>
-        </li>
-    @endcanany
-    
-
+       
 
 
 
@@ -1049,6 +1027,15 @@
                 @canany(['news-view', 'news-create'])
                 <li class="{{ Request::is('admin/web/news*') ? 'active' : '' }}"><a href="{{ route('admin.news.index') }}" class="">{{ trans_choice('module_news', 2) }}</a></li>
                 @endcanany
+
+                @canany('director-view')
+                <li class="{{ Request::is('admin/directors') ? 'active' : '' }}">
+                    <a href="{{ route('directors.index') }}">{{ __('Add Directors') }}</a>
+                </li>
+                @endcanany
+
+
+
 
                 @canany(['faq-view', 'faq-create'])
                 <li class="{{ Request::is('admin/web/faq*') ? 'active' : '' }}"><a href="{{ route('admin.faq.index') }}" class="">{{ trans_choice('module_faq', 2) }}</a></li>
