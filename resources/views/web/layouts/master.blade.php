@@ -362,7 +362,7 @@
                                         </div>
                                         <div class="second-header-link">
                                             <a href="" target="_blank" class="header-link small-link">
-                                                {{ __('eLearning') }}
+                                                {{ __(' E-learning Portal') }}
                                             </a>
                                         </div>
                                     </div>
@@ -482,7 +482,7 @@
                             <div class="f-widget-title">
                                 <h2>{{ __('footer_socials') }}</h2>
                             </div>
-                            <div class="footer-social mt-10">                                    
+                            <div class="footer-social">                                    
                                 @if(isset($socialSetting->facebook))
                                 <a href="{{ $socialSetting->facebook }}" target="_blank"><i class="fab fa-facebook-f"></i></a>
                                 @endif
@@ -504,6 +504,7 @@
                             </div>    
                         </div>
                     </div>
+                    
 
                     <div class="col-xl-4 col-lg-4 col-sm-6">
                         <div class="footer-widget mb-30">
@@ -599,7 +600,38 @@
     </footer>
     <!-- footer-end -->
 
+<style>
 
+.footer-social {
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    gap: 10px; /* Space between icons */
+    margin-top: 10px;
+}
+
+.footer-social a {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px; /* Set circle size */
+    height: 40px; /* Set circle size */
+    border-radius: 50%; /* Make it a circle */
+    background-color: #fc7e2a  /* Default background color */
+    color: white; /* Icon color */
+    font-size: 18px; /* Icon size */
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.footer-social a:hover {
+    background-color: #007bff; /* Change color on hover */
+}
+
+</style>
+
+
+    
  	<!-- Script JS -->
  	<script src="{{ asset('web/js/vendor/modernizr-3.5.0.min.js') }}"></script>
     <script src="{{ asset('web/js/vendor/jquery-3.6.0.min.js') }}"></script>
