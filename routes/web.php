@@ -6,7 +6,7 @@ use App\Models\SmsConfiguration;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\PesaController;
 use App\Http\Controllers\DirectorController;
-
+use App\Http\Controllers\web\ApplicationController;
 
 //
 /*
@@ -105,6 +105,8 @@ Route::delete('/materials/{id}', [FileController::class, 'destroy'])->name('dele
 
 });
 
+
+
 Route::get('/digital/book/home', [FileController::class, 'Home'])->name('materialhome');
 
 
@@ -133,9 +135,9 @@ Route::get('/materials/{id}/download', [FileController::class, 'download'])->nam
 
 //
 
-
-
-
+Route::get('/register/student/{id}', [ApplicationController::class, 'register'])->name('students.register');
+Route::post('/register/update/{id}', [ApplicationController::class, 'update'])->name('students.update');
+//
 Route::get('/materials/create', [FileController::class, 'create'])->name('materials.create');
 Route::post('/materials/store', [FileController::class, 'storefile'])->name('materials.store');
 

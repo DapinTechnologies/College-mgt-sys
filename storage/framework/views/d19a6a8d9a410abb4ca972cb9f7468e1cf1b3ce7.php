@@ -144,31 +144,23 @@
                                                 <i class="fas fa-eye"></i>
                                             </a>
 
-                                            <?php if( $row->status == 1 ): ?>
+                                            <?php if( $row->status == 1 ): ?> 
                                             <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check($access.'-create')): ?>
-                                            <a href="<?php echo e(route($route.'.edit', $row->id)); ?>" class="btn btn-icon btn-primary btn-sm">
-                                                <i class="fa-solid fa-right-from-bracket"></i>
-                                            </a>
+                                                <a href="<?php echo e(route('students.register', $row->id)); ?>" class="btn btn-icon btn-success btn-sm" title="<?php echo e(__('Approve & Register')); ?>">
+                                                    <i class="fas fa-check"></i>
+                                                </a>
                                             <?php endif; ?>
+                                        <?php endif; ?>
+                                        
 
                                             <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check($access.'-edit')): ?>
-                                            <button type="button" class="btn btn-icon btn-danger btn-sm" title="<?php echo e(__('status_rejected')); ?>" data-bs-toggle="modal" data-bs-target="#cancelModal-<?php echo e($row->id); ?>">
+                                            <button type="button" class="btn btn-icon btn-danger btn-sm" title="<?php echo e(__('Reject')); ?>" data-bs-toggle="modal" data-bs-target="#cancelModal-<?php echo e($row->id); ?>">
                                                 <i class="fas fa-times"></i>
                                             </button>
                                             <!-- Include Cancel modal -->
                                             <?php echo $__env->make($view.'.cancel', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
                                             <?php endif; ?>
 
-                                            <?php elseif( $row->status == 0 ): ?>
-                                            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check($access.'-edit')): ?>
-                                            <button type="button" class="btn btn-icon btn-success btn-sm" title="<?php echo e(__('status_pending')); ?>" data-bs-toggle="modal" data-bs-target="#cancelModal-<?php echo e($row->id); ?>">
-                                                <i class="fas fa-check"></i>
-                                            </button>
-                                            <!-- Include Cancel modal -->
-                                            <?php echo $__env->make($view.'.cancel', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
-                                            <?php endif; ?>
-                                            <?php endif; ?>
-                                            
                                             <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check($access.'-delete')): ?>
                                             <button type="button" class="btn btn-icon btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal-<?php echo e($row->id); ?>">
                                                 <i class="fas fa-trash-alt"></i>

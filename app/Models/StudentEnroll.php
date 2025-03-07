@@ -12,7 +12,8 @@ class StudentEnroll extends Model
      * @var array
      */
     protected $fillable = [
-        'student_id', 'program_id', 'session_id', 'semester_id', 'section_id', 'status', 'created_by', 'updated_by',
+        'student_id', 'program_id', 'session_id', 'semester_id', 'section_id', 'status', 'created_by', 
+        'updated_by','mode_of_education','kcse_certificate','kcse_result_slip', 
     ];
 
     public function student()
