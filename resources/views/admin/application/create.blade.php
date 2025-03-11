@@ -1,15 +1,28 @@
 
-
-
-
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
+
     <title>{{ $applicationSetting->title ?? $title }}</title>
     @include('admin.layouts.common.header_script')
     <link rel="stylesheet" href="{{ asset('dashboard/css/pages/wizard.css') }}">
 </head>
 <body>
+
+    @php
+    use App\Models\Program;
+    use App\Models\County;
+    use App\Models\SubCounty;
+
+    // Fetch data directly in the view
+    $programs = Program::all();
+    $counties = County::all();
+    $subCounties = SubCounty::all();
+@endphp
+
+
+
+
 @isset($applicationSetting)
 <div class="main-body">
     <div class="page-wrapper">

@@ -1,24 +1,28 @@
-<?php
-    use App\Models\County;
-    use App\Models\SubCounty;
-
-    $counties = County::all();
-    $subCounties = SubCounty::all(); // Ensure this references the correct table
-
-    
-
-?>
-
-
 
 <!DOCTYPE html>
 <html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>">
 <head>
+
     <title><?php echo e($applicationSetting->title ?? $title); ?></title>
     <?php echo $__env->make('admin.layouts.common.header_script', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <link rel="stylesheet" href="<?php echo e(asset('dashboard/css/pages/wizard.css')); ?>">
 </head>
 <body>
+
+    <?php
+    use App\Models\Program;
+    use App\Models\County;
+    use App\Models\SubCounty;
+
+    // Fetch data directly in the view
+    $programs = Program::all();
+    $counties = County::all();
+    $subCounties = SubCounty::all();
+?>
+
+
+
+
 <?php if(isset($applicationSetting)): ?>
 <div class="main-body">
     <div class="page-wrapper">

@@ -34,12 +34,13 @@
                 <a class="mobile-menu" id="mobile-collapse" href="#!"><span></span></a>
             </div>
 
-
+            @include('admin.layouts.inc.sidebar')
+{{-- 
             @if(Request::is('admin*'))
             <!--- Sidemenu -->
             @include('admin.layouts.inc.sidebar')
             <!-- End Sidebar -->
-            @endif
+            @endif --}}
 
         </div>
     </nav>

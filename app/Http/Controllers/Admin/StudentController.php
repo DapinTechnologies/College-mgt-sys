@@ -38,7 +38,8 @@ use App\Mail\SendPassword;
 use Toastr;
 use Mail;
 use DB;
-
+use App\Models\County;
+ use App\Models\SubCounty;
 class StudentController extends Controller
 {
     use FileUploader;
@@ -139,9 +140,9 @@ class StudentController extends Controller
             'admission_date' => 'required|date',
             'photo' => 'nullable|image',
             'signature' => 'nullable|image',
-            'mode_of_study' => 'required|in:Full-time,Part-time,Online', // Validation for mode_of_study
+           'mode_of_study' => 'required|string|in:Physical,Online,Hybrid',
         ]);
-    //dd($request->all());
+   // dd($request->all());
         // Generate a random password
         $password = Str::random(8);
     

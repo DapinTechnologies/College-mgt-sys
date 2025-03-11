@@ -34,12 +34,8 @@
                 <a class="mobile-menu" id="mobile-collapse" href="#!"><span></span></a>
             </div>
 
-
-            <?php if(Request::is('admin*')): ?>
-            <!--- Sidemenu -->
             <?php echo $__env->make('admin.layouts.inc.sidebar', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
-            <!-- End Sidebar -->
-            <?php endif; ?>
+
 
         </div>
     </nav>

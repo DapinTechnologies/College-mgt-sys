@@ -1,4 +1,6 @@
 <?php
+
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SmsController;
 use App\Services\SMSService;
 use Illuminate\Support\Facades\Http;
@@ -62,13 +64,18 @@ Route::middleware(['XSS'])->namespace('Web')->group(function () {
 
 // Route::get('send/sms', [SMSController::class, 'sendTest']);
 
-Route::get('/sms/view', [SmsController::class, 'index'])->name('sms.index');
 
+    
 
-Route::get('/sms/create', [SmsController::class, 'create'])->name('sms.create'); // Send New SMS
-Route::post('/sms/send', [SmsController::class, 'send'])->name('sms.send');
-Route::post('/sms/send-individual', [SmsController::class, 'sendIndividual'])->name('sms.sendIndividual');
+// Group all admin routes under the 'admin' prefix
 
+    // SMS Routes
+    Route::get('/sms/view', [SmsController::class, 'index'])->name('sms.index');
+    Route::get('/sms/create', [SmsController::class, 'create'])->name('sms.create'); // Send New SMS
+    Route::post('/sms/send', [SmsController::class, 'send'])->name('sms.send');
+    Route::post('/sms/send-individual', [SmsController::class, 'sendIndividual'])->name('sms.sendIndividual');
+
+    // Add other admin routes here
 
 Route::get('sms/send/sms', [SMSController::class, 'sendTest']);
 
