@@ -119,7 +119,7 @@ class ApplicationController extends Controller
     public function store(Request $request)
     {
         //dd($request->all());
-        //dd('Hello');
+       // dd('Hello Application');
         // Field Validation
         $request->validate([
             'student_id' => 'required|unique:students,student_id',

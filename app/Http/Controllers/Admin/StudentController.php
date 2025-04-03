@@ -40,6 +40,7 @@ use Mail;
 use DB;
 use App\Models\County;
  use App\Models\SubCounty;
+ use Intervention\Image\Facades\Image; // Add this import
 class StudentController extends Controller
 {
     use FileUploader;
@@ -125,7 +126,7 @@ class StudentController extends Controller
 
     public function store(Request $request)
     {
-//dd("hello");
+//dd("hello Student Application");
 
         // Validate the incoming request data
         $request->validate([
@@ -224,31 +225,40 @@ class StudentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Student $student)
-    {
-        //
-        $data['title'] = $this->title;
-        $data['route'] = $this->route;
-        $data['view'] = $this->view;
-        $data['path'] = $this->path;
-        
+    
+     public function edit(Student $student)
+     {
+         $data['title'] = $this->title;
+         $data['route'] = $this->route;
+         $data['view'] = $this->view;
+         $data['path'] = $this->path;
+     
+         // Fetch batches and check if they exist
+         $batches = Batch::orderBy('id', 'desc')->get();
+         $data['batches'] = $batches->isEmpty() ? collect([]) : $batches; // Ensure it's not null
+     
+         // Fetch programs
+         $data['programs'] = Program::orderBy('title', 'asc')->get();
+     
+         // Fetch counties
+         $data['counties'] = County::orderBy('CountyName', 'asc')->get();
+     
+         // Fetch sub-counties
+         $data['subCounties'] = SubCounty::orderBy('SubCountyName', 'asc')->get();
+     
+         // Pass the student record to the view
+         $data['row'] = $student;
+         $data['student_id'] = $student->id;
+     
+         // Include KCSE certificate and result slip for download verification
+         $data['kcse_certificate'] = $student->kcse_certificate ? asset($student->kcse_certificate) : null;
+         $data['kcse_result_slip'] = $student->kcse_result_slip ? asset($student->kcse_result_slip) : null;
+     
+         return view($this->view.'.edit', $data);
+     }
+     
 
-        $data['provinces'] = Province::where('status', '1')
-                            ->orderBy('title', 'asc')->get();
-        $data['present_districts'] = District::where('status', '1')
-                            ->where('province_id', $student->present_province)
-                            ->orderBy('title', 'asc')->get();
-        $data['permanent_districts'] = District::where('status', '1')
-                            ->where('province_id', $student->permanent_province)
-                            ->orderBy('title', 'asc')->get();
-        $data['statuses'] = StatusType::where('status', '1')->get();
-        $data['batches'] = Batch::where('status', '1')->orderBy('id', 'desc')->get();
 
-        $data['row'] = $student;
-
-
-        return view($this->view.'.edit', $data);
-    }
 
     /**
      * Update the specified resource in storage.
@@ -272,16 +282,18 @@ class StudentController extends Controller
             'admission_date' => 'required|date',
             'photo' => 'nullable|image',
             'signature' => 'nullable|image',
+            'kcse_result_slip' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:20480', // 20MB max
+            'kcse_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:20480', // 20MB max
         ]);
-
+    
         // Update Data
-        try{
+        try {
             DB::beginTransaction();
-            
+    
             $student->student_id = $request->student_id;
             $student->batch_id = $request->batch;
             $student->admission_date = $request->admission_date;
-
+    
             $student->first_name = $request->first_name;
             $student->last_name = $request->last_name;
             $student->father_name = $request->father_name;
@@ -289,117 +301,149 @@ class StudentController extends Controller
             $student->father_occupation = $request->father_occupation;
             $student->mother_occupation = $request->mother_occupation;
             $student->email = $request->email;
-
+    
             $student->country = $request->country;
             $student->present_province = $request->present_province;
             $student->present_district = $request->present_district;
             $student->present_village = $request->present_village;
             $student->present_address = $request->present_address;
-            $student->permanent_province = $request->permanent_province;
-            $student->permanent_district = $request->permanent_district;
-            $student->permanent_village = $request->permanent_village;
+          
             $student->permanent_address = $request->permanent_address;
-
+    
             $student->gender = $request->gender;
             $student->dob = $request->dob;
             $student->phone = $request->phone;
-            $student->emergency_phone = $request->emergency_phone;
-
+        
+    
             $student->religion = $request->religion;
             $student->caste = $request->caste;
             $student->mother_tongue = $request->mother_tongue;
             $student->marital_status = $request->marital_status;
             $student->blood_group = $request->blood_group;
             $student->nationality = $request->nationality;
-            $student->national_id = $request->national_id;
-            $student->passport_no = $request->passport_no;
-
-            $student->school_name = $request->school_name;
-            $student->school_exam_id = $request->school_exam_id;
-            $student->school_graduation_year = $request->school_graduation_year;
-            $student->school_graduation_point = $request->school_graduation_point;
-            $student->collage_name = $request->collage_name;
-            $student->collage_exam_id = $request->collage_exam_id;
-            $student->collage_graduation_year = $request->collage_graduation_year;
-            $student->collage_graduation_point = $request->collage_graduation_point;
-            $student->school_transcript = $this->updateMultiMedia($request, 'school_transcript', $this->path, $student, 'school_transcript');
-            $student->school_certificate = $this->updateMultiMedia($request, 'school_certificate', $this->path, $student, 'school_certificate');
-            $student->collage_transcript = $this->updateMultiMedia($request, 'collage_transcript', $this->path, $student, 'collage_transcript');
-            $student->collage_certificate = $this->updateMultiMedia($request, 'collage_certificate', $this->path, $student, 'collage_certificate');
+           
+    
+        
+    
+            // Handle KCSE Result Slip
+            if ($request->hasFile('kcse_result_slip')) {
+                $kcseResultSlip = $request->file('kcse_result_slip');
+                $kcseResultSlipName = time() . '_' . $kcseResultSlip->getClientOriginalName();
+                $kcseResultSlipPath = public_path('uploads/students/kcse_result_slips/' . $kcseResultSlipName);
+    
+                // Save the file
+                if ($kcseResultSlip->getMimeType() === 'application/pdf') {
+                    $kcseResultSlip->move(public_path('uploads/students/kcse_result_slips/'), $kcseResultSlipName);
+                } else {
+                    Image::make($kcseResultSlip->getRealPath())
+                        ->resize(800, 800, function ($constraint) {
+                            $constraint->aspectRatio();
+                            $constraint->upsize();
+                        })
+                        ->save($kcseResultSlipPath);
+                }
+    
+                // Delete the old file if it exists
+                if ($student->kcse_result_slip && file_exists(public_path('uploads/students/kcse_result_slips/' . $student->kcse_result_slip))) {
+                    unlink(public_path('uploads/students/kcse_result_slips/' . $student->kcse_result_slip));
+                }
+    
+                $student->kcse_result_slip = $kcseResultSlipName;
+            }
+    
+            // Handle KCSE Certificate
+            if ($request->hasFile('kcse_certificate')) {
+                $kcseCertificate = $request->file('kcse_certificate');
+                $kcseCertificateName = time() . '_' . $kcseCertificate->getClientOriginalName();
+                $kcseCertificatePath = public_path('uploads/students/kcse_certificates/' . $kcseCertificateName);
+    
+                // Save the file
+                if ($kcseCertificate->getMimeType() === 'application/pdf') {
+                    $kcseCertificate->move(public_path('uploads/students/kcse_certificates/'), $kcseCertificateName);
+                } else {
+                    Image::make($kcseCertificate->getRealPath())
+                        ->resize(800, 800, function ($constraint) {
+                            $constraint->aspectRatio();
+                            $constraint->upsize();
+                        })
+                        ->save($kcseCertificatePath);
+                }
+    
+                // Delete the old file if it exists
+                if ($student->kcse_certificate && file_exists(public_path('uploads/students/kcse_certificates/' . $student->kcse_certificate))) {
+                    unlink(public_path('uploads/students/kcse_certificates/' . $student->kcse_certificate));
+                }
+    
+                $student->kcse_certificate = $kcseCertificateName;
+            }
+    
             $student->photo = $this->updateImage($request, 'photo', $this->path, 300, 300, $student, 'photo');
             $student->signature = $this->updateImage($request, 'signature', $this->path, 300, 100, $student, 'signature');
             $student->updated_by = Auth::guard('web')->user()->id;
             $student->save();
-
-
+    
             // Update Status
             $student->statuses()->sync($request->statuses);
-
-
+    
             // Remove Old Relatives
             StudentRelative::where('student_id', $student->id)->delete();
             // Student Relatives
-            if(is_array($request->relations)){
-            foreach($request->relations as $key =>$relation){
-                if($relation != '' && $relation != null){
-                // Insert Data
-                $relation = new StudentRelative;
-                $relation->student_id = $student->id;
-                $relation->relation = $request->relations[$key];
-                $relation->name = $request->relative_names[$key];
-                $relation->occupation = $request->occupations[$key];
-                // $relation->email = $request->relative_emails[$key];
-                $relation->phone = $request->relative_phones[$key];
-                $relation->address = $request->addresses[$key];
-                $relation->save();
+            if (is_array($request->relations)) {
+                foreach ($request->relations as $key => $relation) {
+                    if ($relation != '' && $relation != null) {
+                        // Insert Data
+                        $relation = new StudentRelative;
+                        $relation->student_id = $student->id;
+                        $relation->relation = $request->relations[$key];
+                        $relation->name = $request->relative_names[$key];
+                        $relation->occupation = $request->occupations[$key];
+                        $relation->phone = $request->relative_phones[$key];
+                        $relation->address = $request->addresses[$key];
+                        $relation->save();
+                    }
                 }
-            }}
-
-
+            }
+    
             // Student Documents
-            if(is_array($request->documents)){
-            $documents = $request->file('documents');
-            foreach($documents as $key =>$attach){
-
-                // Valid extension check
-                $valid_extensions = array('JPG','JPEG','jpg','jpeg','png','gif','ico','svg','webp','pdf','doc','docx','txt','zip','rar','csv','xls','xlsx','ppt','pptx','mp3','avi','mp4','mpeg','3gp','mov','ogg','mkv');
-                $file_ext = $attach->getClientOriginalExtension();
-                if(in_array($file_ext, $valid_extensions, true))
-                {
-
-                //Upload Files
-                $filename = $attach->getClientOriginalName();
-                $extension = $attach->getClientOriginalExtension();
-                $fileNameToStore = str_replace([' ','-','&','#','$','%','^',';',':'],'_',$filename).'_'.time().'.'.$extension;
-
-                // Move file inside public/uploads/ directory
-                $attach->move('uploads/'.$this->path.'/', $fileNameToStore);
-
-                // Insert Data
-                $document = new Document;
-                $document->title = $request->titles[$key];
-                $document->attach = $fileNameToStore;
-                $document->save();
-
-                // Attach
-                $document->students()->sync($student->id);
-
+            if (is_array($request->documents)) {
+                $documents = $request->file('documents');
+                foreach ($documents as $key => $attach) {
+                    // Valid extension check
+                    $valid_extensions = array('JPG', 'JPEG', 'jpg', 'jpeg', 'png', 'gif', 'ico', 'svg', 'webp', 'pdf', 'doc', 'docx', 'txt', 'zip', 'rar', 'csv', 'xls', 'xlsx', 'ppt', 'pptx', 'mp3', 'avi', 'mp4', 'mpeg', '3gp', 'mov', 'ogg', 'mkv');
+                    $file_ext = $attach->getClientOriginalExtension();
+                    if (in_array($file_ext, $valid_extensions, true)) {
+                        // Upload Files
+                        $filename = $attach->getClientOriginalName();
+                        $extension = $attach->getClientOriginalExtension();
+                        $fileNameToStore = str_replace([' ', '-', '&', '#', '$', '%', '^', ';', ':'], '_', $filename) . '_' . time() . '.' . $extension;
+    
+                        // Move file inside public/uploads/ directory
+                        $attach->move('uploads/' . $this->path . '/', $fileNameToStore);
+    
+                        // Insert Data
+                        $document = new Document;
+                        $document->title = $request->titles[$key];
+                        $document->attach = $fileNameToStore;
+                        $document->save();
+    
+                        // Attach
+                        $document->students()->sync($student->id);
+                    }
                 }
-            }}
-
+            }
+    
             DB::commit();
-
-
+    
             Toastr::success(__('msg_updated_successfully'), __('msg_success'));
-
+    
+            return redirect()->back();
+        } catch (\Exception $e) {
+            DB::rollBack();
+    
+            Toastr::error(__('msg_updated_error'), __('msg_error'));
+    
             return redirect()->back();
         }
-        catch(\Exception $e){
-
-            Toastr::error(__('msg_updated_error'), __('msg_error'));
-
-            return redirect()->back();
-        }        
     }
 
     /**

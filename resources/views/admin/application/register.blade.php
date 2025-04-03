@@ -3,7 +3,6 @@
 @section('title', 'Register Student')
 
 @section('content')
-
 <div class="main-body">
     <div class="page-wrapper">
         <div class="row">
@@ -16,7 +15,7 @@
                         <form method="POST" action="{{ route('students.update', $application->id) }}" enctype="multipart/form-data">
                             @csrf
                          
-                            
+                        
                             <input type="hidden" name="application_id" value="{{ $application->id }}">
                             <input type="hidden" name="status" value="2"> <!-- Status update -->
 
@@ -53,11 +52,16 @@
                                     <div class="form-group">
                                         <label>Program</label>
                                         <select class="form-control" name="program_id" required>
-                                            <option value="">{{ __('select') }}</option>
+                                            <option value="">{{ __('Select Program') }}</option>
                                             @foreach($programs as $program)
-                                                <option value="{{ $program->id }}" {{ $application->program_id == $program->id ? 'selected' : '' }}>{{ $program->title }}</option>
+                                                <option value="{{ $program->id }}" {{ $application->program_id == $program->id ? 'selected' : '' }}>
+                                                    {{ $program->title }}
+                                                </option>
                                             @endforeach
                                         </select>
+                                        @error('program_id') <!-- Display validation error message -->
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
                                     </div>
                                     <div class="form-group">
                                         <label>Batch</label>
@@ -71,7 +75,7 @@
                                     <!-- Session, Semester, and Section below Batch -->
                                     <div class="form-group">
                                         <label>Session</label>
-                                        <select class="form-control" name="session_id" required>
+                                        <select class="form-control" name="session" required>
                                             <option value="">{{ __('select') }}</option>
                                             @foreach($sessions as $session)
                                                 <option value="{{ $session->id }}">{{ $session->title }}</option>
@@ -80,7 +84,7 @@
                                     </div>
                                     <div class="form-group">
                                         <label>Semester</label>
-                                        <select class="form-control" name="semester_id" required>
+                                        <select class="form-control" name="semester" required>
                                             <option value="">{{ __('select') }}</option>
                                             @foreach($semesters as $semester)
                                                 <option value="{{ $semester->id }}">{{ $semester->title }}</option>
@@ -89,7 +93,7 @@
                                     </div>
                                     <div class="form-group">
                                         <label>Section</label>
-                                        <select class="form-control" name="section_id" required>
+                                        <select class="form-control" name="section" required>
                                             <option value="">{{ __('select') }}</option>
                                             @foreach($sections as $section)
                                                 <option value="{{ $section->id }}">{{ $section->title }}</option>
@@ -170,7 +174,6 @@
                                     </div>
 
                                     <!-- KCSE Certificate and Result Slip Download Links -->
-                                    
                                     <div class="row">
                                         <!-- KCSE Certificate -->
                                         <div class="col-md-6">
@@ -210,17 +213,11 @@
                                             </div>
                                         </div>
                                     </div>
-<div class="form-group">
-    <label>Student ID</label>
-    <input type="text" class="form-control" name="student_id" value="{{ old('student_id', $application->student_id ?? '') }}" required>
-</div>
+
+                                    <div class="form-group">
+                                        <label>Student ID</label>
+                                        <input type="text" class="form-control" name="student_id" value="{{ old('student_id', $application->student_id ?? '') }}" required>
                                     </div>
-
-
-
-
-
-
                                 </div>
                             </div>
                             <div class="form-group">
@@ -233,6 +230,7 @@
         </div>
     </div>
 </div>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {

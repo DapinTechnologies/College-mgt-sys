@@ -211,6 +211,10 @@ public function sub_county()
 return $this->belongsTo(SubCounty::class, 'sub_county_id', 'SubCountyID');
 }
 
+public function enrollments()
+{
+    return $this->hasMany(StudentEnroll::class, 'student_id');
+}
 
 
 }

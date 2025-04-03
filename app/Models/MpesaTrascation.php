@@ -9,7 +9,7 @@ class MpesaTrascation extends Model
 {
     use HasFactory;
 
-
+    protected $guarded = [];
 
     public function student()
     {

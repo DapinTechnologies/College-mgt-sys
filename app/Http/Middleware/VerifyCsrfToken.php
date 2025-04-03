@@ -23,5 +23,9 @@ class VerifyCsrfToken extends Middleware
         'student/login',
         'student/logout',
         'callbacks/*',
+        '/stkcallback',
+        'stkpush',
+         "/confirmation",
+        "/validation"
     ];
 }

@@ -11,6 +11,7 @@ use App\Models\Province;
 use App\Models\Program;
 use Carbon\Carbon;
 use App\Models\County;
+use App\Models\StudentEnroll;
 use App\Models\SubCounty;
 use App\Models\Student;
 use App\Models\Batch;
@@ -22,7 +23,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Crypt;
 use Toastr;
 use DB;
-
+use Auth;
 class ApplicationController extends Controller
 {
     use FileUploader;
@@ -75,6 +76,8 @@ class ApplicationController extends Controller
      */
     public function store(Request $request)
     {
+//dd("Online Application Here");
+
         // dd($request->all()); // Debugging line (optional)
         $request->validate([
             'first_name' => 'required|string|max:255',
@@ -147,6 +150,8 @@ class ApplicationController extends Controller
 
     public function register($id)
     {
+//dd('Online Account Activation');
+
         // Fetch the application with the county and sub_county relationships loaded
         $application = Application::with(['county', 'sub_county'])->where('id', $id)->firstOrFail();
     
@@ -166,10 +171,14 @@ class ApplicationController extends Controller
             'sections', 'application', 'counties', 'subCounties'
         ));
     }
-
-
     public function update(Request $request, $id)
     {
+        $request->merge([
+            'program_id' => (int) $request->program_id,
+        ]);
+       // dd($request->program_id, gettype($request->program_id));
+
+       //dd($request->all());
         // Validate the request
         $request->validate([
             'student_id' => 'required|string|max:255|unique:students,student_id,' . $id, // Ensure student_id is unique
@@ -177,10 +186,10 @@ class ApplicationController extends Controller
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:students,email,' . $id,
             'phone' => 'nullable|string|max:20',
-            'program_id' => 'required|exists:programs,id',
+          'program_id' => 'required|integer|exists:programs,id',
+
             'batch_id' => 'required|exists:batches,id',
-          
-            'admission_date'=>'required|date',
+            'admission_date' => 'required|date',
             'dob' => 'required|date',
             'gender' => 'required|in:1,2,3',
             'national_id' => 'nullable|string|max:255',
@@ -190,6 +199,10 @@ class ApplicationController extends Controller
             'sub_county_id' => 'nullable|exists:sub_counties,SubCountyID',
             'kcse_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:20480', // 2MB max
             'kcse_result_slip' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:20480', // 2MB max
+           
+            'session' => 'required|exists:sessions,id', // Validate session
+            'semester' => 'required|exists:semesters,id', // Validate semester
+            'section' => 'required|exists:sections,id', // Validate section
         ]);
     
         // Find the application
@@ -224,6 +237,7 @@ class ApplicationController extends Controller
             'email' => $request->input('email'),
             'phone' => $request->input('phone'),
             'program_id' => $request->input('program_id'),
+            
             'batch_id' => $request->input('batch_id'),
             'apply_date' => Carbon::now(),
             'dob' => $request->input('dob'),
@@ -237,6 +251,9 @@ class ApplicationController extends Controller
             'kcse_result_slip' => $application->kcse_result_slip,
             'status' => 2, // Set Application status to 2
         ]);
+    
+        // Generate a new random password
+        $password = Str::random(8);
     
         // Find or create the Student model
         $student = Student::updateOrCreate(
@@ -258,15 +275,23 @@ class ApplicationController extends Controller
                 'kcse_year' => $application->kcse_year,
                 'kcse_certificate' => $application->kcse_certificate,
                 'kcse_result_slip' => $application->kcse_result_slip,
-                'password' => Hash::make(Str::random(8)), // Generate and hash a random password
-                'password_text' => Crypt::encryptString(Str::random(8)), // Encrypt the plaintext password
+                'password' => Hash::make($password), // Hash the new password
+                'password_text' => Crypt::encryptString($password), // Encrypt the plaintext password
                 'status' => 1, // Set Student status to 1
             ]
         );
     
+        // Enroll the student
+        $enroll = new StudentEnroll();
+        $enroll->student_id = $student->id; // Use the student's ID
+        $enroll->program_id = $request->program_id;
+        $enroll->session_id = $request->session;
+        $enroll->semester_id = $request->semester;
+        $enroll->section_id = $request->section;
+        $enroll->created_by = Auth::guard('web')->user()->id;
+        $enroll->save();
+    
         return redirect('/admin/admission/application')->with('success', 'Application and Student updated successfully.');
     }
-
-
 
 }

@@ -9,20 +9,34 @@ use App\Http\Controllers\FileController;
 use App\Http\Controllers\PesaController;
 use App\Http\Controllers\DirectorController;
 use App\Http\Controllers\web\ApplicationController;
+use App\Http\Controllers\MpesaController;
 
-//
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group whichlo
-| contains the "web" middleware group. Now create something great!
-|
-*/
+Route::get('/test-fee-update', function() {
+    $fee = App\Models\Fee::find(278);
+    return [
+        'current' => $fee->toArray(),
+        'calculated' => [
+            'new_paid' => $fee->paid_amount + 1,
+            'new_due' => max(0, $fee->fee_amount - ($fee->paid_amount + 1))
+        ]
+    ];
+});
 
-// Web Routes
+
+Route::get('/student/my-mpesa-statement', [MpesaController::class, 'myMpesaStatement'])->name('student.my.mpesa.statement');
+
+
+
+Route::get('/student/process/{id}', [MpesaController::class, 'StudentProcess'])->name('studentprocess');
+
+Route::post('/stkpush', [MpesaController::class, 'initiatePush'])->name('stkpush');
+Route::post('/stkcallback', [MpesaController::class, 'StkCallBack'])->name('mpesa.stkCallBack');
+Route::get('/check-payment-status/{id}', [MpesaController::class, 'checkPaymentStatus'])->name('check.payment.status');
+//Route::get('/check/payment',[MpesaController::class,'checkPaymentStatus'])->name('checkpaymentstatus');
+
+
+
+
 Route::middleware(['XSS'])->namespace('Web')->group(function () {
 
     // Home Route
@@ -156,23 +170,32 @@ Route::get('/materials/{id}', [FileController::class, 'allpdfshow'])->name('mate
 
 Route::get('/view/file/home/{id}', [FileController::class, 'ViewOnlyFile'])->name('viewOnlyFile');
 
+
 Route::get('paymentprocess/{id}', [PesaController::class, 'process'])->name('paymentprocess');
 //Route::post('/payment/mpesa/{id}', [PesaController::class, 'processMpesaPayment'])->name('feepaymentmpesa');
 
 
-Route::middleware(['auth:student'])->group(function () {
+
+Route::get('fees/payment/{id}', [PesaController::class, 'showPaymentForm'])->name('student.fees.payment');
+Route::post('fees/payment/{id}', [PesaController::class, 'processPayment'])->name('student.fees.pay');
+Route::post('initiatepush', [PesaController::class, 'initiatePush'])->name('initiatepush');
+Route::post('/mpesa/callback', [PesaController::class, 'handleCallback'])->name('mpesa.callback');
+//Route::post('/callbacks/stkcallback', [PesaController::class, 'mpesaCallback'])->name('mpesa.callback');
+
+
 
 Route::post('/feepaymentmpesa', [PesaController::class, 'manualPay'])->name('feepaymentmpesa');
 
 
-Route::post('/callbacks/stkcallback', [PesaController::class, 'StkCallback'])->name('mpesa.stkcallback');
+Route::post('/callbacks/stk/callback', [PesaController::class, 'StkCallback'])->name('mpesa.stkcallback');
+
+Route::get('/feepaymentform/{id}', [PesaController::class, 'showPaymentForm'])->name('feepaymentform');
 
 
 
-});
 
 Route::get('/initiatepush',[PesaController::class,'initiateStkPush'])->name('initiatepush');
-    Route::post('/stkcallback',[PesaController::class,'stkCallback'])->name('stkcallback');
+    Route::post('/stk/callback',[PesaController::class,'stkCallback'])->name('stkcallback');
 
 
 

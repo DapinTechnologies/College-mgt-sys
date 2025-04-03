@@ -70,4 +70,7 @@ class StudentEnroll extends Model
     {
         return $this->hasMany(Fee::class, 'student_enroll_id', 'id');
     }
+
+
+
 }

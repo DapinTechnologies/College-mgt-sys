@@ -96,7 +96,7 @@ class StudentSingleEnrollController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request->all());
+        //dd($request->all());
         // Field Validation
         $request->validate([
             'student' => 'required',
