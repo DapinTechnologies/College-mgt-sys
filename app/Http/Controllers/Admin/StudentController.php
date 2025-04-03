@@ -2,464 +2,222 @@
 
 namespace App\Http\Controllers\Admin;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
+use App\Traits\FileUploader;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\StudentsImport;
-use App\Models\StudentRelative;
-use App\Models\IdCardSetting;
+use App\Models\Student;
 use App\Models\StudentEnroll;
 use App\Models\EnrollSubject;
-use Illuminate\Http\Request;
-use App\Traits\FileUploader;
-use App\Models\MailSetting;
-use App\Mail\SendPassword;
+use App\Models\StudentRelative;
+use App\Models\IdCardSetting;
 use App\Models\StatusType;
+use App\Models\Faculty;
+use App\Models\Program;
+use App\Models\Batch;
+use App\Models\Semester;
+use App\Models\Session;
+use App\Models\Section;
 use App\Models\Province;
 use App\Models\District;
-use App\Models\Semester;
-use App\Models\Document;
-use App\Models\Session;
-use App\Models\Program;
-use App\Models\Section;
-use App\Models\Student;
-use App\Models\Faculty;
-use App\Models\Batch;
 use App\Models\Grade;
 use App\Models\Fee;
-use Carbon\Carbon;
+use App\Models\Document;
+use App\Models\MailSetting;
+use App\Models\Setting;
+use App\Models\Field;
+use App\Models\SmsConfiguration;
+use App\Mail\SendPassword;
 use Toastr;
-use Auth;
-use Hash;
 use Mail;
 use DB;
-use App\Models\SmsConfiguration;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
+use App\Models\County;
+ use App\Models\SubCounty;
+ use Intervention\Image\Facades\Image; // Add this import
 class StudentController extends Controller
 {
     use FileUploader;
-    
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
+
+    protected $title;
+    protected $route;
+    protected $view;
+    protected $path;
+    protected $access;
+
     public function __construct()
     {
-        // Module Data
         $this->title = trans_choice('module_student', 1);
         $this->route = 'admin.student';
         $this->view = 'admin.student';
-        $this->path = 'student';
+        $this->path = 'students';
         $this->access = 'student';
 
-
-        $this->middleware('permission:'.$this->access.'-view|'.$this->access.'-create|'.$this->access.'-edit|'.$this->access.'-delete|'.$this->access.'-card', ['only' => ['index','show','status','sendPassword']]);
-        $this->middleware('permission:'.$this->access.'-create', ['only' => ['create','store']]);
-        $this->middleware('permission:'.$this->access.'-edit', ['only' => ['edit','update','status']]);
+        $this->middleware('permission:'.$this->access.'-view|'.$this->access.'-create|'.$this->access.'-edit|'.$this->access.'-delete|'.$this->access.'-card', ['only' => ['index', 'show', 'status', 'sendPassword']]);
+        $this->middleware('permission:'.$this->access.'-create', ['only' => ['create', 'store']]);
+        $this->middleware('permission:'.$this->access.'-edit', ['only' => ['edit', 'update', 'status']]);
         $this->middleware('permission:'.$this->access.'-delete', ['only' => ['destroy']]);
-        $this->middleware('permission:'.$this->access.'-password-print', ['only' => ['printPassword','multiPrintPassword']]);
+        $this->middleware('permission:'.$this->access.'-password-print', ['only' => ['printPassword', 'multiPrintPassword']]);
         $this->middleware('permission:'.$this->access.'-password-change', ['only' => ['passwordChange']]);
-        $this->middleware('permission:'.$this->access.'-card', ['only' => ['index','card']]);
-        $this->middleware('permission:'.$this->access.'-import', ['only' => ['index','import','importStore']]);
+        $this->middleware('permission:'.$this->access.'-card', ['only' => ['index', 'card']]);
+        $this->middleware('permission:'.$this->access.'-import', ['only' => ['index', 'import', 'importStore']]);
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index(Request $request)
     {
-        //
-        $data['title'] = $this->title;
-        $data['route'] = $this->route;
-        $data['view'] = $this->view;
-        $data['path'] = $this->path;
-        $data['access'] = $this->access;
+        $data = [
+            'title'  => $this->title,
+            'route'  => $this->route,
+            'view'   => $this->view,
+            'path'   => $this->path,
+            'access' => $this->access,
+            'faculties' => Faculty::where('status', 1)->orderBy('title', 'asc')->get(),
+            'statuses'  => StatusType::where('status', 1)->orderBy('title', 'asc')->get(),
+            'print' => IdCardSetting::where('slug', 'student-card')->first(),
+        ];
 
+        $filters = [
+            'faculty' => $request->faculty ?? '0',
+            'program' => $request->program ?? '0',
+            'session' => $request->session ?? '0',
+            'semester' => $request->semester ?? '0',
+            'section' => $request->section ?? '0',
+            'status' => $request->status ?? '0',
+            'student_id' => $request->student_id ?? null,
+        ];
 
-        if(!empty($request->faculty) || $request->faculty != null){
-            $data['selected_faculty'] = $faculty = $request->faculty;
-        }
-        else{
-            $data['selected_faculty'] = $faculty = '0';
-        }
-
-        if(!empty($request->program) || $request->program != null){
-            $data['selected_program'] = $program = $request->program;
-        }
-        else{
-            $data['selected_program'] = $program = '0';
-        }
-
-        if(!empty($request->session) || $request->session != null){
-            $data['selected_session'] = $session = $request->session;
-        }
-        else{
-            $data['selected_session'] = $session = '0';
-        }
-
-        if(!empty($request->semester) || $request->semester != null){
-            $data['selected_semester'] = $semester = $request->semester;
-        }
-        else{
-            $data['selected_semester'] = $semester = '0';
-        }
-
-        if(!empty($request->section) || $request->section != null){
-            $data['selected_section'] = $section = $request->section;
-        }
-        else{
-            $data['selected_section'] = $section = '0';
-        }
-
-        if(!empty($request->status) || $request->status != null){
-            $data['selected_status'] = $status = $request->status;
-        }
-        else{
-            $data['selected_status'] = '0';
-        }
-
-        if(!empty($request->student_id) || $request->student_id != null){
-            $data['selected_student_id'] = $student_id = $request->student_id;
-        }
-        else{
-            $data['selected_student_id'] = Null;
-        }
-        
-
-        // Search Filter
-        $data['faculties'] = Faculty::where('status', '1')->orderBy('title', 'asc')->get();
-        $data['statuses'] = StatusType::where('status', '1')->orderBy('title', 'asc')->get();
-
-
-        if(!empty($request->faculty) && $request->faculty != '0'){
-        $data['programs'] = Program::where('faculty_id', $faculty)->where('status', '1')->orderBy('title', 'asc')->get();}
-
-        if(!empty($request->program) && $request->program != '0'){
-        $sessions = Session::where('status', 1);
-        $sessions->with('programs')->whereHas('programs', function ($query) use ($program){
-            $query->where('program_id', $program);
-        });
-        $data['sessions'] = $sessions->orderBy('id', 'desc')->get();}
-
-        if(!empty($request->program) && $request->program != '0'){
-        $semesters = Semester::where('status', 1);
-        $semesters->with('programs')->whereHas('programs', function ($query) use ($program){
-            $query->where('program_id', $program);
-        });
-        $data['semesters'] = $semesters->orderBy('id', 'asc')->get();}
-
-        if(!empty($request->program) && $request->program != '0' && !empty($request->semester) && $request->semester != '0'){
-        $sections = Section::where('status', 1);
-        $sections->with('semesterPrograms')->whereHas('semesterPrograms', function ($query) use ($program, $semester){
-            $query->where('program_id', $program);
-            $query->where('semester_id', $semester);
-        });
-        $data['sections'] = $sections->orderBy('title', 'asc')->get();}
-
-
-        if(isset($request->faculty) || isset($request->program) || isset($request->session) || isset($request->semester) || isset($request->section) || isset($request->status) || isset($request->student_id)){
-            // Student Filter
-            $students = Student::where('status', '1');
-            if($faculty != 0){
-                $students->with('program')->whereHas('program', function ($query) use ($faculty){
-                    $query->where('faculty_id', $faculty);
-                });
-            }
-            $students->with('currentEnroll')->whereHas('currentEnroll', function ($query) use ($program, $session, $semester, $section){
-                if($program != 0){
-                $query->where('program_id', $program);
-                }
-                if($session != 0){
-                $query->where('session_id', $session);
-                }
-                if($semester != 0){
-                $query->where('semester_id', $semester);
-                }
-                if($section != 0){
-                $query->where('section_id', $section);
-                }
+        $query = Student::query();
+        if ($filters['faculty'] !== '0') {
+            $query->whereHas('program', function ($q) use ($filters) {
+                $q->where('faculty_id', $filters['faculty']);
             });
-            if(!empty($request->status)){
-                $students->with('statuses')->whereHas('statuses', function ($query) use ($status){
-                    $query->where('status_type_id', $status);
-                });
-            }
-            if(!empty($request->student_id)){
-                $students->where('student_id', 'LIKE', '%'.$student_id.'%');
-            }
-            $rows = $students->orderBy('student_id', 'desc')->get();
-
-            // Array Sorting
-            $data['rows'] = $rows->sortByDesc(function($query){
-
-               return $query->student_id;
-
-            })->all();
+        }
+        if ($filters['student_id']) {
+            $query->where('student_id', 'LIKE', "%{$filters['student_id']}%");
+        }
+        if ($filters['status'] !== '0') {
+            $query->whereHas('statuses', function ($q) use ($filters) {
+                $q->where('status_type_id', $filters['status']);
+            });
         }
 
-
-        $data['print'] = IdCardSetting::where('slug', 'student-card')->first();
-
-
-        return view($this->view.'.index', $data);
+        $data['rows'] = $query->orderBy('student_id', 'desc')->get();
+        return view("{$this->view}.index", $data);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
-        //
-        $data['title'] = $this->title;
-        $data['route'] = $this->route;
-        $data['view'] = $this->view;
-        $data['path'] = $this->path;
-
-        
-        $data['batches'] = Batch::where('status', '1')->orderBy('id', 'desc')->get();
-        $data['statuses'] = StatusType::where('status', '1')->orderBy('title', 'asc')->get();
-        $data['provinces'] = Province::where('status', '1')->orderBy('title', 'asc')->get();
-
-        return view($this->view.'.create', $data);
+        return view("{$this->view}.create", [
+            'title' => $this->title,
+            'route' => $this->route,
+            'view' => $this->view,
+            'path' => $this->path,
+            'batches' => Batch::where('status', 1)->orderBy('id', 'desc')->get(),
+            'statuses' => StatusType::where('status', 1)->orderBy('title', 'asc')->get(),
+            'provinces' => Province::where('status', 1)->orderBy('title', 'asc')->get(),
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
-{
-    // Field Validation
-    $request->validate([
-        'student_id' => 'required|unique:students,student_id',
-        'batch' => 'required',
-        'program' => 'required',
-        'session' => 'required',
-        'semester' => 'required',
-        'section' => 'required',
-        'first_name' => 'required',
-        'last_name' => 'required',
-        'email' => 'required|email|unique:students,email',
-        'phone' => 'required',
-        'gender' => 'required',
-        'dob' => 'required|date',
-        'admission_date' => 'required|date',
-        'photo' => 'nullable|image',
-        'signature' => 'nullable|image',
-    ]);
-
-    // Random Password
-    $password = str_random(8);
-
-    // Insert Data
-    try {
-        DB::beginTransaction();
-        
-        $student = new Student;
-        $student->student_id = $request->student_id;
-        $student->batch_id = $request->batch;
-        $student->program_id = $request->program;
-        $student->admission_date = $request->admission_date;
-
-        $student->first_name = $request->first_name;
-        $student->last_name = $request->last_name;
-        $student->father_name = $request->father_name;
-        $student->mother_name = $request->mother_name;
-        $student->father_occupation = $request->father_occupation;
-        $student->mother_occupation = $request->mother_occupation;
-        $student->email = $request->email;
-        $student->password = Hash::make($password);
-        $student->password_text = Crypt::encryptString($password);
-
-        $student->country = $request->country;
-        $student->present_province = $request->present_province;
-        $student->present_district = $request->present_district;
-        $student->present_village = $request->present_village;
-        $student->present_address = $request->present_address;
-        $student->permanent_province = $request->permanent_province;
-        $student->permanent_district = $request->permanent_district;
-        $student->permanent_village = $request->permanent_village;
-        $student->permanent_address = $request->permanent_address;
-
-        $student->gender = $request->gender;
-        $student->dob = $request->dob;
-        $student->phone = $request->phone;
-        $student->emergency_phone = $request->emergency_phone;
-
-        $student->religion = $request->religion;
-        $student->caste = $request->caste;
-        $student->mother_tongue = $request->mother_tongue;
-        $student->marital_status = $request->marital_status;
-        $student->blood_group = $request->blood_group;
-        $student->nationality = $request->nationality;
-        $student->national_id = $request->national_id;
-        $student->passport_no = $request->passport_no;
-
-        $student->school_name = $request->school_name;
-        $student->school_exam_id = $request->school_exam_id;
-        $student->school_graduation_year = $request->school_graduation_year;
-        $student->school_graduation_point = $request->school_graduation_point;
-        $student->collage_name = $request->collage_name;
-        $student->collage_exam_id = $request->collage_exam_id;
-        $student->collage_graduation_year = $request->collage_graduation_year;
-        $student->collage_graduation_point = $request->collage_graduation_point;
-        $student->school_transcript = $this->uploadMedia($request, 'school_transcript', $this->path);
-        $student->school_certificate = $this->uploadMedia($request, 'school_certificate', $this->path);
-        $student->collage_transcript = $this->uploadMedia($request, 'collage_transcript', $this->path);
-        $student->collage_certificate = $this->uploadMedia($request, 'collage_certificate', $this->path);
-        $student->photo = $this->uploadImage($request, 'photo', $this->path, 300, 300);
-        $student->signature = $this->uploadImage($request, 'signature', $this->path, 300, 100);
-        $student->status = '1';
-        $student->created_by = Auth::guard('web')->user()->id;
-        $student->save();
-
-        // Attach Status
-        $student->statuses()->attach($request->statuses);
-
-        // Student Relatives
-        if (is_array($request->relations)) {
-            foreach ($request->relations as $key => $relation) {
-                if ($relation != '' && $relation != null) {
-                    // Insert Data
-                    $relation = new StudentRelative;
-                    $relation->student_id = $student->id;
-                    $relation->relation = $request->relations[$key];
-                    $relation->name = $request->relative_names[$key];
-                    $relation->occupation = $request->occupations[$key];
-                    $relation->phone = $request->relative_phones[$key];
-                    $relation->address = $request->addresses[$key];
-                    $relation->save();
-                }
-            }
-        }
-
-        // Student Documents
-        if (is_array($request->documents)) {
-            $documents = $request->file('documents');
-            foreach ($documents as $key => $attach) {
-                // Valid extension check
-                $valid_extensions = array('JPG', 'JPEG', 'jpg', 'jpeg', 'png', 'gif', 'ico', 'svg', 'webp', 'pdf', 'doc', 'docx', 'txt', 'zip', 'rar', 'csv', 'xls', 'xlsx', 'ppt', 'pptx', 'mp3', 'avi', 'mp4', 'mpeg', '3gp', 'mov', 'ogg', 'mkv');
-                $file_ext = $attach->getClientOriginalExtension();
-                if (in_array($file_ext, $valid_extensions, true)) {
-                    // Upload Files
-                    $filename = $attach->getClientOriginalName();
-                    $extension = $attach->getClientOriginalExtension();
-                    $fileNameToStore = str_replace([' ', '-', '&', '#', '$', '%', '^', ';', ':'], '_', $filename) . '_' . time() . '.' . $extension;
-
-                    // Move file inside public/uploads/ directory
-                    $attach->move('uploads/' . $this->path . '/', $fileNameToStore);
-
-                    // Insert Data
-                    $document = new Document;
-                    $document->title = $request->titles[$key];
-                    $document->attach = $fileNameToStore;
-                    $document->save();
-
-                    // Attach
-                    $document->students()->attach($student->id);
-                }
-            }
-        }
-
-        // Student Enroll
-        $enroll = new StudentEnroll();
-        $enroll->student_id = $student->id;
-        $enroll->session_id = $request->session;
-        $enroll->semester_id = $request->semester;
-        $enroll->program_id = $request->program;
-        $enroll->section_id = $request->section;
-        $enroll->created_by = Auth::guard('web')->user()->id;
-        $enroll->save();
-
-        // Assign Subjects
-        $enrollSubject = EnrollSubject::where('program_id', $request->program)
-                                      ->where('semester_id', $request->semester)
-                                      ->where('section_id', $request->section)
-                                      ->first();
-
-        if (isset($enrollSubject)) {
-            foreach ($enrollSubject->subjects as $subject) {
-                // Attach Subject
-                $enroll->subjects()->attach($subject->id);
-            }
-        }
-        $collegeName = \App\Models\Setting::where('id', 1)->first()->title; 
-
-        $phoneNumber = $student->phone;
-
-// Check if the number starts with '0' (Kenyan phone number format)
-if (substr($phoneNumber, 0, 1) === '0') {
-    // Replace the leading '0' with the country code for Kenya ('+254')
-    $phoneNumber = '+254' . substr($phoneNumber, 1);
-}
-        // Send SMS after student registration
-        $smsConfig = SmsConfiguration::find(1); // Retrieve SMS config
-        if ($smsConfig && $smsConfig->api_url && $smsConfig->api_key) {
-            $response = Http::post($smsConfig->api_url, [
-                'api_key' => $smsConfig->api_key,
-                'serviceId' => $smsConfig->service_id,
-                'from' => 'Dapin',
-                'messages' => [
-                    [
-                        'mobile' => $phoneNumber,
-                        'message' => 'Welcome to ' . $collegeName . ', ' . $student->first_name . '. Your student ID is ' . $student->student_id,
-                        'client_ref' => rand(10000, 99999),
-                    ]
-                ]
-            ]);
-
-            if (!$response->successful()) {
-                Log::error('Failed to send SMS', ['response' => $response->json()]);
-            }
-        }
-
-        DB::commit();
-
-        Toastr::success(__('msg_created_successfully'), __('msg_success'));
-
-        return redirect()->route($this->route . '.index');
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Toastr::error(__('msg_created_error'), __('msg_error'));
-        return redirect()->back();
-    }
-}
-
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Student $student)
     {
-        //
-        $data['title'] = $this->title;
-        $data['route'] = $this->route;
-        $data['view'] = $this->view;
-        $data['path'] = $this->path;
-        $data['access'] = $this->access;
+//dd("hello Student Application");
 
-        $data['row'] = $student;
-
-        $data['fees'] = Fee::with('studentEnroll')->whereHas('studentEnroll', function ($query) use ($student){
-                    $query->where('student_id', $student->id);
-                })
-                ->orderBy('id', 'desc')->get();
-
-        $data['grades'] = Grade::where('status', '1')->orderBy('min_mark', 'desc')->get();
-
-        return view($this->view.'.show', $data);
+        // Validate the incoming request data
+        $request->validate([
+            'student_id' => 'required|unique:students,student_id',
+            'program' => 'required',
+            'first_name' => 'required',
+            'last_name' => 'required',
+            'email' => 'required|email|unique:students,email',
+            'phone' => 'required',
+            'gender' => 'required',
+            'dob' => 'required|date',
+            'admission_date' => 'required|date',
+            'photo' => 'nullable|image',
+            'signature' => 'nullable|image',
+           'mode_of_study' => 'required|string|in:Physical,Online,Hybrid',
+        ]);
+   // dd($request->all());
+        // Generate a random password
+        $password = Str::random(8);
+    
+        try {
+            // Begin a database transaction
+            DB::beginTransaction();
+    
+            // Create a new Student instance
+            $student = new Student();
+    
+            // Fill the student model with the request data
+            $student->fill($request->all());
+    
+            // Set additional fields
+            $student->password = Hash::make($password); // Hash the password
+            $student->password_text = Crypt::encryptString($password); // Encrypt the password for reference
+            $student->status = '1'; // Set the student status to active
+            $student->created_by = Auth::id(); // Set the creator of the student record
+    
+            // Map mode_of_study to mode_of_education
+            $student->mode_of_education = $request->mode_of_study;
+    
+            // Handle file uploads for photo and signature
+            if ($request->hasFile('photo')) {
+                $student->photo = $this->uploadFile($request->file('photo'), 'students');
+            }
+            if ($request->hasFile('signature')) {
+                $student->signature = $this->uploadFile($request->file('signature'), 'students');
+            }
+    
+            // Save the student record to the database
+            $student->save();
+    
+            // Attach statuses to the student if provided
+            if ($request->statuses) {
+                $student->statuses()->attach($request->statuses);
+            }
+    
+            // Format the phone number and send an SMS notification
+            $phoneNumber = $this->formatPhoneNumber($student->phone);
+            $this->sendSmsNotification($phoneNumber, $student);
+    
+            // Commit the database transaction
+            DB::commit();
+    
+            // Show a success message and redirect to the student index page
+            Toastr::success(__('msg_created_successfully'), __('msg_success'));
+            return redirect()->route('admin.student.index');
+        } catch (\Exception $e) {
+            // Roll back the database transaction in case of an error
+            DB::rollBack();
+    
+            // Log the error for debugging
+            Log::error('Error Creating Student', ['error' => $e->getMessage()]);
+    
+            // Show an error message and redirect back with input data
+            Toastr::error(__('msg_created_error'), __('msg_error'));
+            return redirect()->back()->withInput();
+        }
     }
+
+
+    
+    public function show($id)
+    {
+        return view("{$this->view}.show", [
+            'title' => $this->title,
+            'route' => $this->route,
+            'view' => $this->view,
+            'path' => $this->path,
+            'row' => Student::findOrFail($id),
+        ]);
+    }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -467,31 +225,40 @@ if (substr($phoneNumber, 0, 1) === '0') {
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Student $student)
-    {
-        //
-        $data['title'] = $this->title;
-        $data['route'] = $this->route;
-        $data['view'] = $this->view;
-        $data['path'] = $this->path;
-        
+    
+     public function edit(Student $student)
+     {
+         $data['title'] = $this->title;
+         $data['route'] = $this->route;
+         $data['view'] = $this->view;
+         $data['path'] = $this->path;
+     
+         // Fetch batches and check if they exist
+         $batches = Batch::orderBy('id', 'desc')->get();
+         $data['batches'] = $batches->isEmpty() ? collect([]) : $batches; // Ensure it's not null
+     
+         // Fetch programs
+         $data['programs'] = Program::orderBy('title', 'asc')->get();
+     
+         // Fetch counties
+         $data['counties'] = County::orderBy('CountyName', 'asc')->get();
+     
+         // Fetch sub-counties
+         $data['subCounties'] = SubCounty::orderBy('SubCountyName', 'asc')->get();
+     
+         // Pass the student record to the view
+         $data['row'] = $student;
+         $data['student_id'] = $student->id;
+     
+         // Include KCSE certificate and result slip for download verification
+         $data['kcse_certificate'] = $student->kcse_certificate ? asset($student->kcse_certificate) : null;
+         $data['kcse_result_slip'] = $student->kcse_result_slip ? asset($student->kcse_result_slip) : null;
+     
+         return view($this->view.'.edit', $data);
+     }
+     
 
-        $data['provinces'] = Province::where('status', '1')
-                            ->orderBy('title', 'asc')->get();
-        $data['present_districts'] = District::where('status', '1')
-                            ->where('province_id', $student->present_province)
-                            ->orderBy('title', 'asc')->get();
-        $data['permanent_districts'] = District::where('status', '1')
-                            ->where('province_id', $student->permanent_province)
-                            ->orderBy('title', 'asc')->get();
-        $data['statuses'] = StatusType::where('status', '1')->get();
-        $data['batches'] = Batch::where('status', '1')->orderBy('id', 'desc')->get();
 
-        $data['row'] = $student;
-
-
-        return view($this->view.'.edit', $data);
-    }
 
     /**
      * Update the specified resource in storage.
@@ -515,16 +282,18 @@ if (substr($phoneNumber, 0, 1) === '0') {
             'admission_date' => 'required|date',
             'photo' => 'nullable|image',
             'signature' => 'nullable|image',
+            'kcse_result_slip' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:20480', // 20MB max
+            'kcse_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:20480', // 20MB max
         ]);
-
+    
         // Update Data
-        try{
+        try {
             DB::beginTransaction();
-            
+    
             $student->student_id = $request->student_id;
             $student->batch_id = $request->batch;
             $student->admission_date = $request->admission_date;
-
+    
             $student->first_name = $request->first_name;
             $student->last_name = $request->last_name;
             $student->father_name = $request->father_name;
@@ -532,117 +301,149 @@ if (substr($phoneNumber, 0, 1) === '0') {
             $student->father_occupation = $request->father_occupation;
             $student->mother_occupation = $request->mother_occupation;
             $student->email = $request->email;
-
+    
             $student->country = $request->country;
             $student->present_province = $request->present_province;
             $student->present_district = $request->present_district;
             $student->present_village = $request->present_village;
             $student->present_address = $request->present_address;
-            $student->permanent_province = $request->permanent_province;
-            $student->permanent_district = $request->permanent_district;
-            $student->permanent_village = $request->permanent_village;
+          
             $student->permanent_address = $request->permanent_address;
-
+    
             $student->gender = $request->gender;
             $student->dob = $request->dob;
             $student->phone = $request->phone;
-            $student->emergency_phone = $request->emergency_phone;
-
+        
+    
             $student->religion = $request->religion;
             $student->caste = $request->caste;
             $student->mother_tongue = $request->mother_tongue;
             $student->marital_status = $request->marital_status;
             $student->blood_group = $request->blood_group;
             $student->nationality = $request->nationality;
-            $student->national_id = $request->national_id;
-            $student->passport_no = $request->passport_no;
-
-            $student->school_name = $request->school_name;
-            $student->school_exam_id = $request->school_exam_id;
-            $student->school_graduation_year = $request->school_graduation_year;
-            $student->school_graduation_point = $request->school_graduation_point;
-            $student->collage_name = $request->collage_name;
-            $student->collage_exam_id = $request->collage_exam_id;
-            $student->collage_graduation_year = $request->collage_graduation_year;
-            $student->collage_graduation_point = $request->collage_graduation_point;
-            $student->school_transcript = $this->updateMultiMedia($request, 'school_transcript', $this->path, $student, 'school_transcript');
-            $student->school_certificate = $this->updateMultiMedia($request, 'school_certificate', $this->path, $student, 'school_certificate');
-            $student->collage_transcript = $this->updateMultiMedia($request, 'collage_transcript', $this->path, $student, 'collage_transcript');
-            $student->collage_certificate = $this->updateMultiMedia($request, 'collage_certificate', $this->path, $student, 'collage_certificate');
+           
+    
+        
+    
+            // Handle KCSE Result Slip
+            if ($request->hasFile('kcse_result_slip')) {
+                $kcseResultSlip = $request->file('kcse_result_slip');
+                $kcseResultSlipName = time() . '_' . $kcseResultSlip->getClientOriginalName();
+                $kcseResultSlipPath = public_path('uploads/students/kcse_result_slips/' . $kcseResultSlipName);
+    
+                // Save the file
+                if ($kcseResultSlip->getMimeType() === 'application/pdf') {
+                    $kcseResultSlip->move(public_path('uploads/students/kcse_result_slips/'), $kcseResultSlipName);
+                } else {
+                    Image::make($kcseResultSlip->getRealPath())
+                        ->resize(800, 800, function ($constraint) {
+                            $constraint->aspectRatio();
+                            $constraint->upsize();
+                        })
+                        ->save($kcseResultSlipPath);
+                }
+    
+                // Delete the old file if it exists
+                if ($student->kcse_result_slip && file_exists(public_path('uploads/students/kcse_result_slips/' . $student->kcse_result_slip))) {
+                    unlink(public_path('uploads/students/kcse_result_slips/' . $student->kcse_result_slip));
+                }
+    
+                $student->kcse_result_slip = $kcseResultSlipName;
+            }
+    
+            // Handle KCSE Certificate
+            if ($request->hasFile('kcse_certificate')) {
+                $kcseCertificate = $request->file('kcse_certificate');
+                $kcseCertificateName = time() . '_' . $kcseCertificate->getClientOriginalName();
+                $kcseCertificatePath = public_path('uploads/students/kcse_certificates/' . $kcseCertificateName);
+    
+                // Save the file
+                if ($kcseCertificate->getMimeType() === 'application/pdf') {
+                    $kcseCertificate->move(public_path('uploads/students/kcse_certificates/'), $kcseCertificateName);
+                } else {
+                    Image::make($kcseCertificate->getRealPath())
+                        ->resize(800, 800, function ($constraint) {
+                            $constraint->aspectRatio();
+                            $constraint->upsize();
+                        })
+                        ->save($kcseCertificatePath);
+                }
+    
+                // Delete the old file if it exists
+                if ($student->kcse_certificate && file_exists(public_path('uploads/students/kcse_certificates/' . $student->kcse_certificate))) {
+                    unlink(public_path('uploads/students/kcse_certificates/' . $student->kcse_certificate));
+                }
+    
+                $student->kcse_certificate = $kcseCertificateName;
+            }
+    
             $student->photo = $this->updateImage($request, 'photo', $this->path, 300, 300, $student, 'photo');
             $student->signature = $this->updateImage($request, 'signature', $this->path, 300, 100, $student, 'signature');
             $student->updated_by = Auth::guard('web')->user()->id;
             $student->save();
-
-
+    
             // Update Status
             $student->statuses()->sync($request->statuses);
-
-
+    
             // Remove Old Relatives
             StudentRelative::where('student_id', $student->id)->delete();
             // Student Relatives
-            if(is_array($request->relations)){
-            foreach($request->relations as $key =>$relation){
-                if($relation != '' && $relation != null){
-                // Insert Data
-                $relation = new StudentRelative;
-                $relation->student_id = $student->id;
-                $relation->relation = $request->relations[$key];
-                $relation->name = $request->relative_names[$key];
-                $relation->occupation = $request->occupations[$key];
-                // $relation->email = $request->relative_emails[$key];
-                $relation->phone = $request->relative_phones[$key];
-                $relation->address = $request->addresses[$key];
-                $relation->save();
+            if (is_array($request->relations)) {
+                foreach ($request->relations as $key => $relation) {
+                    if ($relation != '' && $relation != null) {
+                        // Insert Data
+                        $relation = new StudentRelative;
+                        $relation->student_id = $student->id;
+                        $relation->relation = $request->relations[$key];
+                        $relation->name = $request->relative_names[$key];
+                        $relation->occupation = $request->occupations[$key];
+                        $relation->phone = $request->relative_phones[$key];
+                        $relation->address = $request->addresses[$key];
+                        $relation->save();
+                    }
                 }
-            }}
-
-
+            }
+    
             // Student Documents
-            if(is_array($request->documents)){
-            $documents = $request->file('documents');
-            foreach($documents as $key =>$attach){
-
-                // Valid extension check
-                $valid_extensions = array('JPG','JPEG','jpg','jpeg','png','gif','ico','svg','webp','pdf','doc','docx','txt','zip','rar','csv','xls','xlsx','ppt','pptx','mp3','avi','mp4','mpeg','3gp','mov','ogg','mkv');
-                $file_ext = $attach->getClientOriginalExtension();
-                if(in_array($file_ext, $valid_extensions, true))
-                {
-
-                //Upload Files
-                $filename = $attach->getClientOriginalName();
-                $extension = $attach->getClientOriginalExtension();
-                $fileNameToStore = str_replace([' ','-','&','#','$','%','^',';',':'],'_',$filename).'_'.time().'.'.$extension;
-
-                // Move file inside public/uploads/ directory
-                $attach->move('uploads/'.$this->path.'/', $fileNameToStore);
-
-                // Insert Data
-                $document = new Document;
-                $document->title = $request->titles[$key];
-                $document->attach = $fileNameToStore;
-                $document->save();
-
-                // Attach
-                $document->students()->sync($student->id);
-
+            if (is_array($request->documents)) {
+                $documents = $request->file('documents');
+                foreach ($documents as $key => $attach) {
+                    // Valid extension check
+                    $valid_extensions = array('JPG', 'JPEG', 'jpg', 'jpeg', 'png', 'gif', 'ico', 'svg', 'webp', 'pdf', 'doc', 'docx', 'txt', 'zip', 'rar', 'csv', 'xls', 'xlsx', 'ppt', 'pptx', 'mp3', 'avi', 'mp4', 'mpeg', '3gp', 'mov', 'ogg', 'mkv');
+                    $file_ext = $attach->getClientOriginalExtension();
+                    if (in_array($file_ext, $valid_extensions, true)) {
+                        // Upload Files
+                        $filename = $attach->getClientOriginalName();
+                        $extension = $attach->getClientOriginalExtension();
+                        $fileNameToStore = str_replace([' ', '-', '&', '#', '$', '%', '^', ';', ':'], '_', $filename) . '_' . time() . '.' . $extension;
+    
+                        // Move file inside public/uploads/ directory
+                        $attach->move('uploads/' . $this->path . '/', $fileNameToStore);
+    
+                        // Insert Data
+                        $document = new Document;
+                        $document->title = $request->titles[$key];
+                        $document->attach = $fileNameToStore;
+                        $document->save();
+    
+                        // Attach
+                        $document->students()->sync($student->id);
+                    }
                 }
-            }}
-
+            }
+    
             DB::commit();
-
-
+    
             Toastr::success(__('msg_updated_successfully'), __('msg_success'));
-
+    
+            return redirect()->back();
+        } catch (\Exception $e) {
+            DB::rollBack();
+    
+            Toastr::error(__('msg_updated_error'), __('msg_error'));
+    
             return redirect()->back();
         }
-        catch(\Exception $e){
-
-            Toastr::error(__('msg_updated_error'), __('msg_error'));
-
-            return redirect()->back();
-        }        
     }
 
     /**

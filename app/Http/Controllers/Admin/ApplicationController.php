@@ -17,6 +17,8 @@ use App\Models\Document;
 use App\Models\Program;
 use App\Models\Student;
 use App\Models\Batch;
+use App\Models\County;
+use App\Models\SubCounty;
 use Carbon\Carbon;
 use Toastr;
 use Auth;
@@ -61,6 +63,7 @@ class ApplicationController extends Controller
      */
     public function index(Request $request) 
 { 
+    //dd("Hello");
     $data['title'] = $this->title; 
     $data['route'] = $this->route;
     $data['view'] = $this->view; 
@@ -115,6 +118,8 @@ class ApplicationController extends Controller
      */
     public function store(Request $request)
     {
+        //dd($request->all());
+       // dd('Hello Application');
         // Field Validation
         $request->validate([
             'student_id' => 'required|unique:students,student_id',
@@ -132,23 +137,32 @@ class ApplicationController extends Controller
             'admission_date' => 'required|date',
             'photo' => 'nullable|image',
             'signature' => 'nullable|image',
+            'kcse_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png', // KCSE certificate validation
+            'kcse_result_slip' => 'nullable|file|mimes:pdf,jpg,jpeg,png', // KCSE result slip validation
+            'county' => 'required', // County validation
+            'sub_county' => 'required', // Sub-county validation
+            'physical_address' => 'nullable|string', // Physical address validation
+            'mode_of_education' => 'required', // Mode of education validation
         ]);
+      
 
         // Random Password
         $password = str_random(8);
         $data = Application::where('registration_no', $request->registration_no)->firstOrFail();
-
+    
         // Insert Data
-        try{
+        try {
             DB::beginTransaction();
-            
+    
             $application = new Student;
             $application->student_id = $request->student_id;
             $application->registration_no = $request->registration_no;
             $application->batch_id = $request->batch;
             $application->program_id = $request->program;
-            $application->admission_date = $request->admission_date;
+            $application->admission_date = Carbon::parse($request->admission_date)->format('Y-m-d');
 
+    
+            // Personal Information
             $application->first_name = $request->first_name;
             $application->last_name = $request->last_name;
             $application->father_name = $request->father_name;
@@ -158,22 +172,30 @@ class ApplicationController extends Controller
             $application->email = $request->email;
             $application->password = Hash::make($password);
             $application->password_text = Crypt::encryptString($password);
-
-            $application->country = $request->country;
-            $application->present_province = $request->present_province;
-            $application->present_district = $request->present_district;
-            $application->present_village = $request->present_village;
-            $application->present_address = $request->present_address;
-            $application->permanent_province = $request->permanent_province;
-            $application->permanent_district = $request->permanent_district;
-            $application->permanent_village = $request->permanent_village;
-            $application->permanent_address = $request->permanent_address;
-
-            $application->gender = $request->gender;
+    
+            // Location Information
+            $application->county = $request->county; // Store county
+            $application->sub_county = $request->sub_county; // Store sub-county
+            $application->permanent_address = $request->physical_address; // Store physical address as permanent address
+    
+            // Gender
+            $application->gender = $request->gender; // Store gender
+    
+            // Mode of Education
+            $application->mode_of_education = $request->mode_of_education; // Store mode of education
+    
+            // KCSE Results
+            if ($request->hasFile('kcse_certificate')) {
+                $application->kcse_certificate = $this->uploadMedia($request, 'kcse_certificate', $this->path);
+            }
+            if ($request->hasFile('kcse_result_slip')) {
+                $application->kcse_result_slip = $this->uploadMedia($request, 'kcse_result_slip', $this->path);
+            }
+    
+            // Other Fields
             $application->dob = $request->dob;
             $application->phone = $request->phone;
             $application->emergency_phone = $request->emergency_phone;
-
             $application->religion = $request->religion;
             $application->caste = $request->caste;
             $application->mother_tongue = $request->mother_tongue;
@@ -182,113 +204,73 @@ class ApplicationController extends Controller
             $application->nationality = $request->nationality;
             $application->national_id = $request->national_id;
             $application->passport_no = $request->passport_no;
-
+    
+            // School Information
             $application->school_name = $request->school_name;
             $application->school_exam_id = $request->school_exam_id;
             $application->school_graduation_year = $request->school_graduation_year;
             $application->school_graduation_point = $request->school_graduation_point;
             $application->collage_name = $request->collage_name;
             $application->collage_exam_id = $request->collage_exam_id;
-
-
-
             $application->collage_graduation_year = $request->collage_graduation_year;
             $application->collage_graduation_point = $request->collage_graduation_point;
-            if($request->hasFile('school_transcript')){
-            $application->school_transcript = $this->uploadMedia($request, 'school_transcript', $this->path);
+    
+            // Upload Files
+            if ($request->hasFile('photo')) {
+                $application->photo = $this->uploadImage($request, 'photo', $this->path, 300, 300);
+            } else {
+                $application->photo = $data->photo;
             }
-            else{
-            $application->school_transcript = $data->school_transcript;
+            if ($request->hasFile('signature')) {
+                $application->signature = $this->uploadImage($request, 'signature', $this->path, 300, 100);
+            } else {
+                $application->signature = $data->signature;
             }
-            if($request->hasFile('school_certificate')){
-            $application->school_certificate = $this->uploadMedia($request, 'school_certificate', $this->path);
-            }
-            else{
-            $application->school_certificate = $data->school_certificate;
-            }
-            if($request->hasFile('collage_transcript')){
-            $application->collage_transcript = $this->uploadMedia($request, 'collage_transcript', $this->path);
-            }
-            else{
-            $application->collage_transcript = $data->collage_transcript;
-            }
-            if($request->hasFile('collage_certificate')){
-            $application->collage_certificate = $this->uploadMedia($request, 'collage_certificate', $this->path);
-            }
-            else{
-            $application->collage_certificate = $data->collage_certificate;
-            }
-            if($request->hasFile('photo')){
-            $application->photo = $this->uploadImage($request, 'photo', $this->path, 300, 300);
-            }
-            else{
-            $application->photo = $data->photo;
-            }
-            if($request->hasFile('signature')){
-            $application->signature = $this->uploadImage($request, 'signature', $this->path, 300, 100);
-            }
-            else{
-            $application->signature = $data->signature;
-            }
+    
             $application->status = '1';
             $application->created_by = Auth::guard('web')->user()->id;
             $application->save();
-
-
+    
             // Attach Status
             $application->statuses()->attach($request->statuses);
-
-
+    
             // Student Relatives
-            if(is_array($request->relations)){
-            foreach($request->relations as $key =>$relation){
-                if($relation != '' && $relation != null){
-                // Insert Data
-                $relation = new StudentRelative;
-                $relation->student_id = $application->id;
-                $relation->relation = $request->relations[$key];
-                $relation->name = $request->relative_names[$key];
-                $relation->occupation = $request->occupations[$key];
-                // $relation->email = $request->relative_emails[$key];
-                $relation->phone = $request->relative_phones[$key];
-                $relation->address = $request->addresses[$key];
-                $relation->save();
+            if (is_array($request->relations)) {
+                foreach ($request->relations as $key => $relation) {
+                    if ($relation != '' && $relation != null) {
+                        $relation = new StudentRelative;
+                        $relation->student_id = $application->id;
+                        $relation->relation = $request->relations[$key];
+                        $relation->name = $request->relative_names[$key];
+                        $relation->occupation = $request->occupations[$key];
+                        $relation->phone = $request->relative_phones[$key];
+                        $relation->address = $request->addresses[$key];
+                        $relation->save();
+                    }
                 }
-            }}
-
-
+            }
+    
             // Student Documents
-            if(is_array($request->documents)){
-            $documents = $request->file('documents');
-            foreach($documents as $key =>$attach){
-
-                // Valid extension check
-                $valid_extensions = array('JPG','JPEG','jpg','jpeg','png','gif','ico','svg','webp','pdf','doc','docx','txt','zip','rar','csv','xls','xlsx','ppt','pptx','mp3','avi','mp4','mpeg','3gp','mov','ogg','mkv');
-                $file_ext = $attach->getClientOriginalExtension();
-                if(in_array($file_ext, $valid_extensions, true))
-                {
-
-                //Upload Files
-                $filename = $attach->getClientOriginalName();
-                $extension = $attach->getClientOriginalExtension();
-                $fileNameToStore = str_replace([' ','-','&','#','$','%','^',';',':'],'_',$filename).'_'.time().'.'.$extension;
-
-                // Move file inside public/uploads/ directory
-                $attach->move('uploads/'.$this->path.'/', $fileNameToStore);
-
-                // Insert Data
-                $document = new Document;
-                $document->title = $request->titles[$key];
-                $document->attach = $fileNameToStore;
-                $document->save();
-
-                // Attach
-                $document->students()->attach($application->id);
-
+            if (is_array($request->documents)) {
+                $documents = $request->file('documents');
+                foreach ($documents as $key => $attach) {
+                    $valid_extensions = ['JPG', 'JPEG', 'jpg', 'jpeg', 'png', 'gif', 'ico', 'svg', 'webp', 'pdf', 'doc', 'docx', 'txt', 'zip', 'rar', 'csv', 'xls', 'xlsx', 'ppt', 'pptx', 'mp3', 'avi', 'mp4', 'mpeg', '3gp', 'mov', 'ogg', 'mkv'];
+                    $file_ext = $attach->getClientOriginalExtension();
+                    if (in_array($file_ext, $valid_extensions, true)) {
+                        $filename = $attach->getClientOriginalName();
+                        $extension = $attach->getClientOriginalExtension();
+                        $fileNameToStore = str_replace([' ', '-', '&', '#', '$', '%', '^', ';', ':'], '_', $filename) . '_' . time() . '.' . $extension;
+                        $attach->move('uploads/' . $this->path . '/', $fileNameToStore);
+    
+                        $document = new Document;
+                        $document->title = $request->titles[$key];
+                        $document->attach = $fileNameToStore;
+                        $document->save();
+                        $document->students()->attach($application->id);
+                    }
                 }
-            }}
-            
-
+            }
+    
             // Student Enroll
             $enroll = new StudentEnroll();
             $enroll->student_id = $application->id;
@@ -298,35 +280,27 @@ class ApplicationController extends Controller
             $enroll->section_id = $request->section;
             $enroll->created_by = Auth::guard('web')->user()->id;
             $enroll->save();
-
-
+    
             // Assign Subjects
             $enrollSubject = EnrollSubject::where('program_id', $request->program)->where('semester_id', $request->semester)->where('section_id', $request->section)->first();
-            
-            if(isset($enrollSubject)){
-                foreach($enrollSubject->subjects as $subject){
-                    // Attach Subject
+            if (isset($enrollSubject)) {
+                foreach ($enrollSubject->subjects as $subject) {
                     $enroll->subjects()->attach($subject->id);
                 }
             }
-
-
+    
             // Application Status Update
             $data->status = '2';
             $data->updated_by = Auth::guard('web')->user()->id;
             $data->save();
-
+    
             DB::commit();
-
-
+    
             Toastr::success(__('msg_created_successfully'), __('msg_success'));
-
-            return redirect()->route($this->route.'.index');
-        }
-        catch(\Exception $e){
-
+            return redirect()->route($this->route . '.index');
+        } catch (\Exception $e) {
+            DB::rollBack();
             Toastr::error(__('msg_created_error'), __('msg_error'));
-
             return redirect()->back();
         }
     }

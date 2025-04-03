@@ -134,31 +134,23 @@
                                                 <i class="fas fa-eye"></i>
                                             </a>
 
-                                            @if( $row->status == 1 )
+                                            @if( $row->status == 1 ) {{-- Only show the approve button if the status is pending --}}
                                             @can($access.'-create')
-                                            <a href="{{ route($route.'.edit', $row->id) }}" class="btn btn-icon btn-primary btn-sm">
-                                                <i class="fa-solid fa-right-from-bracket"></i>
-                                            </a>
+                                                <a href="{{ route('students.register', $row->id) }}" class="btn btn-icon btn-success btn-sm" title="{{ __('Approve & Register') }}">
+                                                    <i class="fas fa-check"></i>
+                                                </a>
                                             @endcan
+                                        @endif
+                                        
 
                                             @can($access.'-edit')
-                                            <button type="button" class="btn btn-icon btn-danger btn-sm" title="{{ __('status_rejected') }}" data-bs-toggle="modal" data-bs-target="#cancelModal-{{ $row->id }}">
+                                            <button type="button" class="btn btn-icon btn-danger btn-sm" title="{{ __('Reject') }}" data-bs-toggle="modal" data-bs-target="#cancelModal-{{ $row->id }}">
                                                 <i class="fas fa-times"></i>
                                             </button>
                                             <!-- Include Cancel modal -->
                                             @include($view.'.cancel')
                                             @endcan
 
-                                            @elseif( $row->status == 0 )
-                                            @can($access.'-edit')
-                                            <button type="button" class="btn btn-icon btn-success btn-sm" title="{{ __('status_pending') }}" data-bs-toggle="modal" data-bs-target="#cancelModal-{{ $row->id }}">
-                                                <i class="fas fa-check"></i>
-                                            </button>
-                                            <!-- Include Cancel modal -->
-                                            @include($view.'.cancel')
-                                            @endcan
-                                            @endif
-                                            
                                             @can($access.'-delete')
                                             <button type="button" class="btn btn-icon btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $row->id }}">
                                                 <i class="fas fa-trash-alt"></i>

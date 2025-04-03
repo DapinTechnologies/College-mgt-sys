@@ -1,5 +1,13 @@
 @extends('admin.layouts.master')
 @section('title', $title)
+
+@section('page_css')
+    <!-- Wizard css -->
+    <link rel="stylesheet" href="{{ asset('dashboard/css/pages/wizard.css') }}">
+@endsection
+
+
+
 @section('content')
 
 <!-- Start Content-->
@@ -109,6 +117,12 @@
 @endsection
 
 @section('page_js')
+    <!-- validate Js -->
+    <script src="{{ asset('dashboard/plugins/jquery-validation/js/jquery.validate.min.js') }}"></script>
+
+    <!-- Wizard Js -->
+    <script src="{{ asset('dashboard/js/pages/jquery.steps.js') }}"></script>
+
 <script type="text/javascript">
 "use strict";
 $(".faculty").on('change',function(e){

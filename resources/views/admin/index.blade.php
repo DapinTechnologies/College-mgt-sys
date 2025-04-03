@@ -83,49 +83,45 @@
                     </div>
                 </div>
             </div>
+
+
             
-            <div class="col-sm-6 col-md-6 col-xl-3">
-                <div class="card theme-bg bitcoin-wallet">
-                    <div class="card-block">
-                        <!-- Fetch and display the SMS balance -->
-                        @php 
-                            $smsConfig = \App\Models\SmsConfiguration::first();
-                            $balance = 'No SMS configuration found';
-                            if ($smsConfig) {
-                                $apiKey = $smsConfig->api_key;
-                                $response = \Illuminate\Support\Facades\Http::post('https://smsportal.dapintechnologies.com/sms/v3/profile', [
-                                    'api_key' => $apiKey
-                                ]);
-                                if ($response->successful()) {
-                                    $responseJson = $response->json();
-                                    $balance = $responseJson[0]['wallet']['credit_balance'] ?? 'Balance not found';
-                                    // Check if the balance is numeric before formatting it
-                                    if (is_numeric($balance)) {
-                                        $balance = number_format((float) $balance, 0);
-                                        // Ensure it's treated as a float
-                                        if ($balance == 0) {
-                                            $balance = '0'; // Explicitly set to string '0'
-                                        }
-                                    } else {
-                                        $balance = 'No Credit';
-                                    }
-                                } else {
-                                    $balance = 'Failed to authenticate API key.';
-                                }
-                            }
-                        @endphp
-                        <h5 class="text-white mb-2">{{ __('SMS Credit') }}</h5>
-                        <h2 class="text-white mb-2 f-w-300">
-                            @if ($balance == 'Balance not found' || $balance == 'Failed to authenticate API key.' || $balance == 'No SMS configuration found' || $balance == 'No Credit' || $balance === '0')
-                                <span class="badge badge-danger alert"> {{ $balance }} </span>
-                            @else
-                                <span class="badge badge-success"> {{ $balance }} </span>
-                            @endif
-                        </h2>
-                        <i class="fas fa-exchange-alt f-70 text-white"></i>
-                    </div>
-                </div>
-            </div>
+           <div class="col-sm-6 col-md-6 col-xl-3">
+    <div class="card theme-bg bitcoin-wallet">
+        <div class="card-block">
+            <h5 class="text-white mb-2">{{ __('SMS Credit') }}</h5>
+            <h2 class="text-white mb-2 f-w-300">
+                <span id="sms-balance" class="badge badge-secondary">Loading...</span>
+            </h2>
+            <i class="fas fa-exchange-alt f-70 text-white"></i>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url: "{{ route('fetch.sms.balance') }}",
+            type: "GET",
+            success: function (data) {
+                let balance = data.balance;
+                let balanceElement = $("#sms-balance");
+
+                if (balance === 'Balance not found' || balance === 'Failed to authenticate API key.' || 
+                    balance === 'No SMS configuration found' || balance === 'No Credit' || balance === '0') {
+                    balanceElement.text(balance).removeClass("badge-success").addClass("badge-danger");
+                } else {
+                    balanceElement.text(balance).removeClass("badge-danger").addClass("badge-success");
+                }
+            },
+            error: function () {
+                $("#sms-balance").text("Failed to load balance").removeClass("badge-success").addClass("badge-danger");
+            }
+        });
+    });
+</script>
+
             
         @canany(['fees-student-report', 'payroll-report'])
         <div class="row">

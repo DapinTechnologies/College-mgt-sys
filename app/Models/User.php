@@ -48,4 +48,12 @@ class User extends Authenticatable
 {
     return $this->hasOne(Student::class);
 }
+
+
+
+public function studentEnroll()
+{
+    return $this->hasOne(StudentEnroll::class, 'user_id'); // adjust if your FK differs
+}
+
 }

@@ -166,6 +166,7 @@ class StudentGroupEnrollController extends Controller
      */
     public function store(Request $request)
     {
+        dd($request->all());
         // Field Validation
         $request->validate([
             'semester' => 'required',
@@ -174,56 +175,80 @@ class StudentGroupEnrollController extends Controller
             'program' => 'required',
             'students' => 'required',
             'subjects' => 'required',
+            'mode_of_education' => 'required|in:Full-time,Part-time,Online',
+            'kcse_certificate.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048', // Optional KCSE Certificate (array of files)
+            'kcse_result_slip.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048', // Optional KCSE Result Slip (array of files)
         ]);
-
-
-        try{
+   
+        try {
             DB::beginTransaction();
-
-            foreach($request->students as $key => $student){
-            if(!empty($student) || $student == ''){
-
-                // Duplicate Enroll Check
-                $duplicate_check = StudentEnroll::where('student_id', $student)->where('session_id', $request->session)->where('semester_id', $request->semester)->where('section_id', $request->section)->first();
-                $session_check = StudentEnroll::where('student_id', $student)->where('session_id', $request->session)->first();
-                // $semester_check = StudentEnroll::where('student_id', $student)->where('semester_id', $request->semester)->first();
-
-                if(!isset($duplicate_check) && !isset($session_check)){
-                    // Pre Enroll Update
-                    $pre_enroll = StudentEnroll::where('student_id', $student)->where('status', '1')->first();
-                    if(isset($pre_enroll)){
-                        $pre_enroll->status = '0';
-                        $pre_enroll->save();
+    
+            foreach ($request->students as $key => $student) {
+                if (!empty($student) || $student == '') {
+    
+                    // Duplicate Enroll Check
+                    $duplicate_check = StudentEnroll::where('student_id', $student)
+                        ->where('session_id', $request->session)
+                        ->where('semester_id', $request->semester)
+                        ->where('section_id', $request->section)
+                        ->first();
+    
+                    $session_check = StudentEnroll::where('student_id', $student)
+                        ->where('session_id', $request->session)
+                        ->first();
+    
+                    if (!isset($duplicate_check) && !isset($session_check)) {
+                        // Pre Enroll Update
+                        $pre_enroll = StudentEnroll::where('student_id', $student)
+                            ->where('status', '1')
+                            ->first();
+    
+                        if (isset($pre_enroll)) {
+                            $pre_enroll->status = '0';
+                            $pre_enroll->save();
+                        }
+    
+                        // Student New Enroll
+                        $enroll = new StudentEnroll;
+                        $enroll->student_id = $student;
+                        $enroll->program_id = $request->program;
+                        $enroll->session_id = $request->session;
+                        $enroll->semester_id = $request->semester;
+                        $enroll->section_id = $request->section;
+                        $enroll->mode_of_education = $request->mode_of_education;
+                        $enroll->created_by = Auth::guard('web')->user()->id;
+                        $enroll->save();
+    
+                        // Attach Subject
+                        $enroll->subjects()->attach($request->subjects);
+    
+                        // Handle KCSE Certificate Upload (if provided)
+                        if ($request->hasFile("kcse_certificate.$key")) {
+                            $kcseCertificatePath = $request->file("kcse_certificate.$key")->store('public/uploads/kcse_certificates');
+                            $enroll->kcse_certificate = str_replace('public/', '', $kcseCertificatePath);
+                            $enroll->save();
+                        }
+    
+                        // Handle KCSE Result Slip Upload (if provided)
+                        if ($request->hasFile("kcse_result_slip.$key")) {
+                            $kcseResultSlipPath = $request->file("kcse_result_slip.$key")->store('public/uploads/kcse_result_slips');
+                            $enroll->kcse_result_slip = str_replace('public/', '', $kcseResultSlipPath);
+                            $enroll->save();
+                        }
+    
+                        Toastr::success(__('msg_promoted_successfully'), __('msg_success'));
+                    } else {
+                        Toastr::error(__('msg_enroll_already_exists'), __('msg_error'));
                     }
-
-                    // Student New Enroll
-                    $enroll = new StudentEnroll;
-                    $enroll->student_id = $student;
-                    $enroll->program_id = $request->program;
-                    $enroll->session_id = $request->session;
-                    $enroll->semester_id = $request->semester;
-                    $enroll->section_id = $request->section;
-                    $enroll->created_by = Auth::guard('web')->user()->id;
-                    $enroll->save();
-
-                    // Attach Subject
-                    $enroll->subjects()->attach($request->subjects);
-
-                    Toastr::success(__('msg_promoted_successfully'), __('msg_success'));
                 }
-                else{
-
-                    Toastr::error(__('msg_enroll_already_exists'), __('msg_error'));
-                }
-            }}
+            }
+    
             DB::commit();
-            
             return redirect()->back();
-        }
-        catch(\Exception $e){
-
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error Creating Student Enrollment', ['error' => $e->getMessage()]);
             Toastr::error(__('msg_created_error'), __('msg_error'));
-
             return redirect()->back();
         }
     }

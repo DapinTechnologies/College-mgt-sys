@@ -32,144 +32,88 @@
                         @endcan
                         @endisset
                     </div>
-                    
-                    <div class="card-block">
-                        <form class="needs-validation" novalidate method="get" action="{{ route($route.'.index') }}">
-                            <div class="row gx-2">
-                                @include('common.inc.student_search_filter')
-
-                                <div class="form-group col-md-3">
-                                    <label for="status">{{ __('field_status') }}</label>
-                                    <select class="form-control" name="status" id="status" required>
-                                        <option value="0">{{ __('all') }}</option>
-                                        @foreach( $statuses as $status )
-                                        <option value="{{ $status->id }}" @if( $selected_status == $status->id) selected @endif>{{ $status->title }}</option>
-                                        @endforeach
-                                    </select>
-
-                                    <div class="invalid-feedback">
-                                      {{ __('required_field') }} {{ __('field_status') }}
-                                    </div>
-                                </div>
-                                <div class="form-group col-md-3">
-                                    <label for="student_id">{{ __('field_student_id') }}</label>
-                                    <input type="text" class="form-control" name="student_id" id="student_id" value="{{ $selected_student_id }}">
-
-                                    <div class="invalid-feedback">
-                                      {{ __('required_field') }} {{ __('field_student_id') }}
-                                    </div>
-                                </div>
-                                <div class="form-group col-md-3">
-                                    <button type="submit" class="btn btn-info btn-filter"><i class="fas fa-search"></i> {{ __('btn_search') }}</button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
                 </div>
             </div>
 
-           @isset($rows)
+            @isset($rows)
             <div class="col-sm-12">
                 <div class="card">
                     <div class="card-block">
                         <!-- [ Data table ] start -->
                         <div class="table-responsive">
-
-                           <table id="export-table" class="display table nowrap table-striped table-hover" style="width:100%">
-    <thead>
-        <tr>
-            <th># 
-                <div class="checkbox checkbox-success d-inline">
-                    <input type="checkbox" id="checkbox" class="all_select">
-                    <label for="checkbox" class="cr" style="margin-bottom: 0px;"></label>
-                </div>
-            </th>
-            <th>{{ __('field_student_id') }}</th>
-            <th>{{ __('field_name') }}</th>
-            <th>{{ __('field_program') }}</th>
-            <th>{{ __('field_session') }}</th>
-            <th>{{ __('field_semester') }}</th>
-            <th>{{ __('field_section') }}</th>
-            <th>{{ __('field_status') }}</th>
-            <th>{{ __('field_action') }}</th>
-        </tr>
-    </thead>
-    <table id="export-table" class="display table nowrap table-striped table-hover" style="width:100%">
-        <thead>
-            <tr>
-                <th># 
-                    <div class="checkbox checkbox-success d-inline">
-                        <input type="checkbox" id="checkbox" class="all_select">
-                        <label for="checkbox" class="cr" style="margin-bottom: 0px;"></label>
-                    </div>
-                </th>
-                <th>{{ __('field_student_id') }}</th>
-                <th>{{ __('field_name') }}</th>
-                <th>{{ __('field_program') }}</th>
-                <th>{{ __('field_session') }}</th>
-                <th>{{ __('field_semester') }}</th>
-                <th>{{ __('field_section') }}</th>
-                <th>{{ __('field_status') }}</th>
-                <th>{{ __('field_action') }}</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($rows as $key => $row)
-            @php
-                $enroll = \App\Models\Student::enroll($row->id);
-            @endphp
-            <tr class="{{ $loop->first ? 'table-success' : '' }}"> <!-- Highlight the latest entry -->
-                <td>
-                    {{ $key + 1 }}
-                    <div class="checkbox checkbox-primary d-inline">
-                        <input type="checkbox" data_id="{{ $row->id }}" id="checkbox-{{ $row->id }}" value="{{ $row->id }}">
-                        <label for="checkbox-{{ $row->id }}" class="cr"></label>
-                    </div>
-                </td>
-                <td>
-                    <a href="{{ route($route.'.show', $row->id) }}">
-                        #{{ $row->student_id }}
-                    </a>
-                </td>
-                <td>{{ $row->first_name }} {{ $row->last_name }}</td>
-                <td>{{ $row->program->shortcode ?? '' }}</td>
-                <td>{{ $enroll->session->title ?? '' }}</td>
-                <td>{{ $enroll->semester->title ?? '' }}</td>
-                <td>{{ $enroll->section->title ?? '' }}</td>
-                <td>
-                    @foreach($row->statuses as $status)
-                    <span class="badge badge-primary">{{ $status->title }}</span><br>
-                    @endforeach
-                </td>
-                <td>
-                    <a href="{{ route($route.'.show', $row->id) }}" class="btn btn-icon btn-success btn-sm">
-                        <i class="fas fa-eye"></i>
-                    </a>
-                    @can($access.'-edit')
-                    <a href="{{ route($route.'.edit', $row->id) }}" class="btn btn-icon btn-primary btn-sm">
-                        <i class="far fa-edit"></i>
-                    </a>
-                    @endcan
-                    @can($access.'-delete')
-                    <button type="button" class="btn btn-icon btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $row->id }}">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
-                    @include('admin.layouts.inc.delete')
-                    @endcan
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
-    
-</table>
-
+                            <table id="export-table" class="display table nowrap table-striped table-hover" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th># 
+                                            <div class="checkbox checkbox-success d-inline">
+                                                <input type="checkbox" id="checkbox" class="all_select">
+                                                <label for="checkbox" class="cr" style="margin-bottom: 0px;"></label>
+                                            </div>
+                                        </th>
+                                        <th>{{ __('field_student_id') }}</th>
+                                        <th>{{ __('field_name') }}</th>
+                                        <th>{{ __('field_program') }}</th>
+                                        <th>{{ __('field_session') }}</th>
+                                        <th>{{ __('field_semester') }}</th>
+                                        <th>{{ __('field_section') }}</th>
+                                        <th>{{ __('field_status') }}</th>
+                                        <th>{{ __('field_action') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($rows as $key => $row)
+                                    @php
+                                        $enroll = \App\Models\Student::enroll($row->id);
+                                    @endphp
+                                    <tr class="{{ $loop->first ? 'table-success' : '' }}"> <!-- Highlight the latest entry -->
+                                        <td>
+                                            {{ $key + 1 }}
+                                            <div class="checkbox checkbox-primary d-inline">
+                                                <input type="checkbox" data_id="{{ $row->id }}" id="checkbox-{{ $row->id }}" value="{{ $row->id }}">
+                                                <label for="checkbox-{{ $row->id }}" class="cr"></label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <a href="{{ route($route.'.show', $row->id) }}">
+                                                #{{ $row->student_id }}
+                                            </a>
+                                        </td>
+                                        <td>{{ $row->first_name }} {{ $row->last_name }}</td>
+                                        <td>{{ $row->program->shortcode ?? '' }}</td>
+                                        <td>{{ $enroll->session->title ?? '' }}</td>
+                                        <td>{{ $enroll->semester->title ?? '' }}</td>
+                                        <td>{{ $enroll->section->title ?? '' }}</td>
+                                        <td>
+                                            @foreach($row->statuses as $status)
+                                            <span class="badge badge-primary">{{ $status->title }}</span><br>
+                                            @endforeach
+                                        </td>
+                                        <td>
+                                            <a href="{{ route($route.'.show', $row->id) }}" class="btn btn-icon btn-success btn-sm">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            @can($access.'-edit')
+                                            <a href="{{ route($route.'.edit', $row->id) }}" class="btn btn-icon btn-primary btn-sm">
+                                                <i class="far fa-edit"></i>
+                                            </a>
+                                            @endcan
+                                            @can($access.'-delete')
+                                            <button type="button" class="btn btn-icon btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $row->id }}">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                            @include('admin.layouts.inc.delete')
+                                            @endcan
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
                         <!-- [ Data table ] end -->
                     </div>
                 </div>
             </div>
-           @endisset
+            @endisset
             
         </div>
         <!-- [ Main Content ] end -->

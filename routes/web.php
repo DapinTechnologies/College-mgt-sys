@@ -1,26 +1,42 @@
 <?php
+
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SmsController;
 use App\Services\SMSService;
 use Illuminate\Support\Facades\Http;
 use App\Models\SmsConfiguration;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\PesaController;
+use App\Http\Controllers\DirectorController;
+use App\Http\Controllers\web\ApplicationController;
+use App\Http\Controllers\MpesaController;
+
+Route::get('/test-fee-update', function() {
+    $fee = App\Models\Fee::find(278);
+    return [
+        'current' => $fee->toArray(),
+        'calculated' => [
+            'new_paid' => $fee->paid_amount + 1,
+            'new_due' => max(0, $fee->fee_amount - ($fee->paid_amount + 1))
+        ]
+    ];
+});
+
+
+Route::get('/student/my-mpesa-statement', [MpesaController::class, 'myMpesaStatement'])->name('student.my.mpesa.statement');
 
 
 
-//
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group whichlo
-| contains the "web" middleware group. Now create something great!
-|
-*/
+Route::get('/student/process/{id}', [MpesaController::class, 'StudentProcess'])->name('studentprocess');
 
-// Web Routes
+Route::post('/stkpush', [MpesaController::class, 'initiatePush'])->name('stkpush');
+Route::post('/stkcallback', [MpesaController::class, 'StkCallBack'])->name('mpesa.stkCallBack');
+Route::get('/check-payment-status/{id}', [MpesaController::class, 'checkPaymentStatus'])->name('check.payment.status');
+//Route::get('/check/payment',[MpesaController::class,'checkPaymentStatus'])->name('checkpaymentstatus');
+
+
+
+
 Route::middleware(['XSS'])->namespace('Web')->group(function () {
 
     // Home Route
@@ -62,13 +78,18 @@ Route::middleware(['XSS'])->namespace('Web')->group(function () {
 
 // Route::get('send/sms', [SMSController::class, 'sendTest']);
 
-Route::get('/sms/view', [SmsController::class, 'index'])->name('sms.index');
 
+    
 
-Route::get('/sms/create', [SmsController::class, 'create'])->name('sms.create'); // Send New SMS
-Route::post('/sms/send', [SmsController::class, 'send'])->name('sms.send');
-Route::post('/sms/send-individual', [SmsController::class, 'sendIndividual'])->name('sms.sendIndividual');
+// Group all admin routes under the 'admin' prefix
 
+    // SMS Routes
+    Route::get('/sms/view', [SmsController::class, 'index'])->name('sms.index');
+    Route::get('/sms/create', [SmsController::class, 'create'])->name('sms.create'); // Send New SMS
+    Route::post('/sms/send', [SmsController::class, 'send'])->name('sms.send');
+    Route::post('/sms/send-individual', [SmsController::class, 'sendIndividual'])->name('sms.sendIndividual');
+
+    // Add other admin routes here
 
 Route::get('sms/send/sms', [SMSController::class, 'sendTest']);
 
@@ -78,6 +99,10 @@ Route::get('/sms/{id}', [SmsController::class, 'show'])->name('sms.show');
 Route::get('/sms/balance', [SmsController::class, 'showBalance'])->name('sms.balance');
 
 Route::get('/balance/credit', [SmsController::class, 'showCredits'])->name('dashboardbalance');
+
+Route::get('/fetch-sms-balance', [SmsController::class, 'fetchBalance'])->name('fetch.sms.balance');
+
+
 
 
 Route::get('/all/digital/files', [FileController::class, 'index'])->name('alldigitalbooks');
@@ -100,6 +125,8 @@ Route::delete('/materials/{id}', [FileController::class, 'destroy'])->name('dele
 //  
 
 });
+
+
 
 Route::get('/digital/book/home', [FileController::class, 'Home'])->name('materialhome');
 
@@ -129,9 +156,9 @@ Route::get('/materials/{id}/download', [FileController::class, 'download'])->nam
 
 //
 
-
-
-
+Route::get('/register/student/{id}', [ApplicationController::class, 'register'])->name('students.register');
+Route::post('/register/update/{id}', [ApplicationController::class, 'update'])->name('students.update');
+//
 Route::get('/materials/create', [FileController::class, 'create'])->name('materials.create');
 Route::post('/materials/store', [FileController::class, 'storefile'])->name('materials.store');
 
@@ -143,23 +170,32 @@ Route::get('/materials/{id}', [FileController::class, 'allpdfshow'])->name('mate
 
 Route::get('/view/file/home/{id}', [FileController::class, 'ViewOnlyFile'])->name('viewOnlyFile');
 
+
 Route::get('paymentprocess/{id}', [PesaController::class, 'process'])->name('paymentprocess');
 //Route::post('/payment/mpesa/{id}', [PesaController::class, 'processMpesaPayment'])->name('feepaymentmpesa');
 
 
-Route::middleware(['auth:student'])->group(function () {
+
+Route::get('fees/payment/{id}', [PesaController::class, 'showPaymentForm'])->name('student.fees.payment');
+Route::post('fees/payment/{id}', [PesaController::class, 'processPayment'])->name('student.fees.pay');
+Route::post('initiatepush', [PesaController::class, 'initiatePush'])->name('initiatepush');
+Route::post('/mpesa/callback', [PesaController::class, 'handleCallback'])->name('mpesa.callback');
+//Route::post('/callbacks/stkcallback', [PesaController::class, 'mpesaCallback'])->name('mpesa.callback');
+
+
 
 Route::post('/feepaymentmpesa', [PesaController::class, 'manualPay'])->name('feepaymentmpesa');
 
 
-Route::post('/callbacks/stkcallback', [PesaController::class, 'StkCallback'])->name('mpesa.stkcallback');
+Route::post('/callbacks/stk/callback', [PesaController::class, 'StkCallback'])->name('mpesa.stkcallback');
+
+Route::get('/feepaymentform/{id}', [PesaController::class, 'showPaymentForm'])->name('feepaymentform');
 
 
 
-});
 
 Route::get('/initiatepush',[PesaController::class,'initiateStkPush'])->name('initiatepush');
-    Route::post('/stkcallback',[PesaController::class,'stkCallback'])->name('stkcallback');
+    Route::post('/stk/callback',[PesaController::class,'stkCallback'])->name('stkcallback');
 
 
 
@@ -179,6 +215,17 @@ Route::get('/settings', [PesaController::class, 'index'])->name('settings.index'
 //feepaymentmpesa
 
 
+Route::get('/index/director',[DirectorController::class,'index'])->name('directors.index');
+Route::get('/create/director',[DirectorController::class,'create'])->name('directors.create');
+Route::post('/store/director',[DirectorController::class,'store'])->name('directors.store');
+//Route::post('/update/director/{id}',[DirectorController::class,'update'])->name('directors.update');
+Route::put('/update/director/{id}', [DirectorController::class, 'update'])->name('directors.update');
+
+
+Route::get('/home/about',[DirectorController::class,'About'])->name('aboutus');
+
+
+//DirectorController  directors.store directors.update  
 
 Route::get('/test/imagick', function () {
     if (class_exists('Imagick')) {

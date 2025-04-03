@@ -11,9 +11,7 @@ class Fee extends Model
      *
      * @var array
      */
-    protected $fillable = [
-        'student_enroll_id', 'category_id', 'fee_amount', 'fine_amount', 'discount_amount', 'paid_amount', 'assign_date', 'due_date', 'pay_date', 'payment_method', 'note', 'status', 'created_by', 'updated_by',
-    ];
+    protected $guarded = [];
   
     public function studentEnroll()
     {
@@ -54,5 +52,23 @@ public function transactions()
 {
     return $this->hasMany(Transaction::class, 'fee_id', 'id');
 }
+
+public function student()
+{
+    return $this->belongsTo(Student::class, 'student_id');
+}
+
+
+public function stkpushes()
+{
+    return $this->hasMany(Stkpush::class);
+}
+
+
+
+
+
+
+
 
 }

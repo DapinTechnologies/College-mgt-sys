@@ -15,6 +15,7 @@ use App\Models\Grade;
 use Toastr;
 use Auth;
 use DB;
+use App\Models\Field;
 
 class StudentSingleEnrollController extends Controller
 {
@@ -95,6 +96,7 @@ class StudentSingleEnrollController extends Controller
      */
     public function store(Request $request)
     {
+        //dd($request->all());
         // Field Validation
         $request->validate([
             'student' => 'required',
@@ -103,24 +105,36 @@ class StudentSingleEnrollController extends Controller
             'session' => 'required',
             'section' => 'required',
             'subjects' => 'required',
+            'mode_of_study' => 'required|in:Full-time,Part-time,Online',
+            'kcse_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048', // Optional KCSE Certificate
+            'kcse_result_slip' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048', // Optional KCSE Result Slip
         ]);
 
-
-        try{
+        try {
             DB::beginTransaction();
+    
             // Duplicate Enroll Check
-            $duplicate_check = StudentEnroll::where('student_id', $request->student)->where('session_id', $request->session)->where('semester_id', $request->semester)->where('section_id', $request->section)->first();
-            $session_check = StudentEnroll::where('student_id', $request->student)->where('session_id', $request->session)->first();
-            // $semester_check = StudentEnroll::where('student_id', $request->student)->where('semester_id', $request->semester)->first();
-
-            if(!isset($duplicate_check) && !isset($session_check)){
+            $duplicate_check = StudentEnroll::where('student_id', $request->student)
+                ->where('session_id', $request->session)
+                ->where('semester_id', $request->semester)
+                ->where('section_id', $request->section)
+                ->first();
+    
+            $session_check = StudentEnroll::where('student_id', $request->student)
+                ->where('session_id', $request->session)
+                ->first();
+    
+            if (!isset($duplicate_check) && !isset($session_check)) {
                 // Pre Enroll Update
-                $pre_enroll = StudentEnroll::where('student_id', $request->student)->where('status', '1')->first();
-                if(isset($pre_enroll)){
+                $pre_enroll = StudentEnroll::where('student_id', $request->student)
+                    ->where('status', '1')
+                    ->first();
+    
+                if (isset($pre_enroll)) {
                     $pre_enroll->status = '0';
                     $pre_enroll->save();
                 }
-
+    
                 // Student New Enroll
                 $enroll = new StudentEnroll;
                 $enroll->student_id = $request->student;
@@ -130,29 +144,40 @@ class StudentSingleEnrollController extends Controller
                 $enroll->section_id = $request->section;
                 $enroll->created_by = Auth::guard('web')->user()->id;
                 $enroll->save();
-
+    
                 // Attach Subject
                 $enroll->subjects()->attach($request->subjects);
-
+    
                 // Program Update
                 $student = Student::find($request->student);
+    
+                // Handle KCSE Certificate Upload (if provided)
+                if ($request->hasFile('kcse_certificate')) {
+                    $kcseCertificatePath = $request->file('kcse_certificate')->store('public/uploads/kcse_certificates');
+                    $student->kcse_certificate = str_replace('public/', '', $kcseCertificatePath);
+                }
+    
+                // Handle KCSE Result Slip Upload (if provided)
+                if ($request->hasFile('kcse_result_slip')) {
+                    $kcseResultSlipPath = $request->file('kcse_result_slip')->store('public/uploads/kcse_result_slips');
+                    $student->kcse_result_slip = str_replace('public/', '', $kcseResultSlipPath);
+                }
+    
+                // Update the student's program
                 $student->program_id = $request->program;
                 $student->save();
-
+    
                 Toastr::success(__('msg_promoted_successfully'), __('msg_success'));
-            }
-            else{
-
+            } else {
                 Toastr::error(__('msg_enroll_already_exists'), __('msg_error'));
             }
+    
             DB::commit();
-
             return redirect()->back();
-        }
-        catch(\Exception $e){
-
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error Creating Student Enrollment', ['error' => $e->getMessage()]);
             Toastr::error(__('msg_created_error'), __('msg_error'));
-
             return redirect()->back();
         }
     }
